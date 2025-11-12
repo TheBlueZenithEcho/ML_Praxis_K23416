@@ -1,0 +1,111 @@
+import { Toaster } from 'sonner';
+// SỬA 1: Đổi import 'react-router' thành 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom'; 
+
+// --- IMPORT CÁC TRANG ADMIN ---
+import Ad_Home from './pages/Ad_Home';
+import Ad_Users from './pages/Ad_Users';
+import Ad_Products from './pages/Ad_Products';
+// import Login from './pages/Login'; // Bạn không có Login trong file Admin, tôi sẽ dùng SignIn/SignUp từ file User
+import "./index.css";
+import Ad_Designers from './pages/Ad_Designers';
+import Ad_Interior from './pages/Ad_Interior';
+import AvatarProfile from './components/AvatarProfile'; 
+import ProductProfile from './components/ProductProfile';
+import Ad_ProductNew from './components/Ad_ProductNew';
+import InteriorProfile from './components/InteriorProfile';
+import Ad_DesignerNew from './components/Ad_DesignerNew';
+
+// --- IMPORT CÁC TRANG USER (TỪ FILE BẠN DÁN) ---
+import HomePage from './pages/HomePage';
+import SignUp from './pages/SignUp';
+import SignIn from './pages/SignIn';
+import NotFound from './pages/NotFound';
+import LivingRoom from './pages/LivingRoom';
+import BedRoom from './pages/Bedroom';
+import Cus_HomePage from './pages/Cus_HomePage';
+import Kitchen from './pages/Kitchen';
+
+// --- IMPORT LAYOUT ADMIN ---
+import LayoutAdmin from './layouts/LayoutAdmin';
+
+function App() {
+
+  const router = createBrowserRouter([
+    
+    // --- LUỒNG 1: USER (CÔNG KHAI, KHÔNG LAYOUT) ---
+    // Các trang này nằm ở cấp cao nhất, theo yêu cầu của bạn
+    {
+      path: "/",
+      element: <HomePage/>,
+    },
+    {
+      path: "/LivingRoom",
+      element: <LivingRoom/>,
+    },
+    {
+      path: "/BedRoom",
+      element: <BedRoom/>,
+    },
+    {
+      path: "/Kitchen",
+      element: <Kitchen/>,
+    },
+    {
+      path: "/customer/:id",
+      element: <Cus_HomePage />,
+    },
+
+    // --- LUỒNG 2: ADMIN (QUẢN TRỊ, CÓ LAYOUT) ---
+    // SỬA 2: Toàn bộ luồng Admin được chuyển vào path "/admin"
+    {
+      path: "/admin",
+      element: <LayoutAdmin />, 
+      children: [
+        // SỬA 3: Path gốc của Admin giờ là "/admin" (dùng index: true)
+        { index: true, element: <Ad_Home /> },
+        
+        // SỬA 4: Các path con đã được đổi thành path tương đối (ví dụ: "users")
+        { path: "users", element: <Ad_Users /> },         // (trước là /admin_users)
+        { path: "designers", element: <Ad_Designers/> },  // (trước là /admin_designers)
+        { path: "products", element: <Ad_Products /> },    // (trước là /admin_products)
+        { path: "interior", element: <Ad_Interior /> },    // (trước là /admin_interior)
+        
+        // SỬA 5: Các path động cũng được cập nhật
+        { path: "admin/:id", element: <AvatarProfile /> },      // (trước là /admin/:id)
+        { path: "designer/:id", element: <AvatarProfile /> },  // (trước là /designer/:id)
+        { path: "designer/new", element: <Ad_DesignerNew /> }, // (trước là /designer/new)
+        { path: "users/:id", element: <AvatarProfile /> },      // (trước là /users/:id)
+        { path: "products/:id", element: <ProductProfile /> },  // (trước là /products/:id)
+        { path: "products/new", element: <Ad_ProductNew />},  // (trước là /products/new)
+        { path: "interior/:id", element: <InteriorProfile /> }, // (trước là /interior/:id)
+      ]
+    },
+
+    // --- LUỒNG 3: CÁC TRANG ĐỘC LẬP (KHÔNG LAYOUT) ---
+    // (Từ file User của bạn)
+    {
+      path: "/SignUp",
+      element: <SignUp />,
+    },
+    {
+      path: "/SignIn",
+      element: <SignIn/>,
+    },
+    {
+      path: "*", // Trang 404
+      element: <NotFound />,
+    },
+  ]);
+
+  return (
+    <>
+      {/* SỬA 6: Thêm Toaster từ file User của bạn */}
+      <Toaster />
+      <RouterProvider router={router} />
+    </>
+  );
+}
+
+export default App;
+

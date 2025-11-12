@@ -1,7 +1,39 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+  "compilerOptions": {
+    // ⚙️ Alias từ root dự án
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@types": [
+        "./src/types/index.ts"
+      ],
+      "@types/*": [
+        "./src/types/*"
+      ]
+    },
+    // ⚙️ Tương thích với React + Vite
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "jsx": "react-jsx",
+    // ⚙️ Hỗ trợ tốt hơn khi import và build
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    // ⚙️ Bỏ cảnh báo deprecation lặt vặt
+    "ignoreDeprecations": "5.0"
+  },
+  // ✅ Theo dõi toàn bộ code trong src/
+  "include": [
+    "src"
   ]
 }

@@ -1,0 +1,6 @@
+npm install @mui/x-data-grid
+npm install @mui/material @emotion/react @emotion/styled
+tailwindcss
+react route
+npm install @mui/icons-material
+npm install recharts
