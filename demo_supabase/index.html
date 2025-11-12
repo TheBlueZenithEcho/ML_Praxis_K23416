@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Supabase API</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="form-container">
+            <h2>Đăng Ký (Sign Up)</h2>
+            <form id="signup-form">
+                <input type="text" id="signup-name" placeholder="Tên của bạn" required>
+                <input type="email" id="signup-email" placeholder="Email" required>
+                <input type="password" id="signup-password" placeholder="Mật khẩu (tối thiểu 6 ký tự)" required>
+                <button type="submit">Đăng Ký</button>
+            </form>
+        </div>
+
+        <div class="form-container">
+            <h2>Đăng Nhập (Login)</h2>
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Mật khẩu" required>
+                <button type="submit">Đăng Nhập</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="message-board"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
