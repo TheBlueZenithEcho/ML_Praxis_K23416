@@ -13,16 +13,25 @@ supabase stop
 ### Working with DB in Supabase
 1. Tạo một file migration mới
 ```
-supabase migration new create_tables_praxis
+supabase migration new <file_name>
 ```
-2. Mở file SQL đó trong `supabase/migrations/` và thêm lệnh CREATE TABLE
+2. Mở file SQL đó trong `supabase/migrations/` và thêm lệnh SQL
 
-3. Áp dụng migration vào CSDL local của bạn
+3. Áp dụng migration vào CSDL local của bạn ( first time only )
 ```
 supabase db reset
 ```
+4. Apply migration (2nd time onwards)
+```
+supabase migration up
+```
+5. Push to supabase cloud
+Note: only push when connected to ivp4 internet
+```
+supabase db push
+```
 
-### important info
+### Important info
 API URL: http://127.0.0.1:54321
 
      GraphQL URL: http://127.0.0.1:54321/graphql/v1
