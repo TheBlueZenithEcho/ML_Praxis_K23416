@@ -2,20 +2,20 @@ import React, { useState } from "react"; // ✅ Đã sửa: Import React và use
 import { Link, useNavigate } from "react-router-dom"; // ✅ Đã sửa: Import Link và useNavigate từ 'react-router-dom'
 import { useAuth } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "../../lib/supabaseClient";
 
 // Định nghĩa Interface (Typescript)
 interface User {
-    id: number; // Thêm ID vào interface
+    id: string; // Thêm ID vào interface
     img: string;
     name: string;
-    role: 'admin' | 'designer' | 'user';
+    role: string;
     email: string;
     phone: string;
     createdAt: string;
 }
 
-// URL API bạn cung cấp
-const API_URL = "https://api.npoint.io/4a915d88732882680a44";
+// const API_URL = "https://api.npoint.io/4a915d88732882680a44";
 
 const LoginForm = () => {
     // State (Trạng thái) để lưu trữ dữ liệu nhập từ form
@@ -37,10 +37,66 @@ const LoginForm = () => {
     };
 
     // Xử lý logic đăng nhập
-    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    // const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    //     e.preventDefault();
+
+    //     // Kiểm tra input cơ bản
+    //     if (email.trim() === "" || password.trim() === "") {
+    //         setErrorMessage("Please enter your email and password.");
+    //         setIsModalOpen(true);
+    //         return;
+    //     }
+
+    //     setIsLoading(true);
+
+    //     setErrorMessage("");
+
+    //     try {
+    //         const response = await fetch(API_URL);
+    //         if (!response.ok) throw new Error("Could not connect to API");
+
+    //         const users: User[] = await response.json();
+    //         const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    //         if (!foundUser) {
+    //             setErrorMessage("Email not found.");
+    //             setIsModalOpen(true);
+    //             return;
+    //         }
+
+    //         if (password !== "123456") {
+    //             setErrorMessage("Incorrect password.");
+    //             setIsModalOpen(true);
+    //             return;
+    //         }
+
+    //         // ✅ Lưu thông tin user vào AuthContext
+    //         login({
+    //             id: foundUser.id,
+    //             role: foundUser.role,
+    //             name: foundUser.name,
+    //             email: foundUser.email,
+    //         });
+
+    //         // ✅ Chuyển hướng theo role
+    //         if (foundUser.role === "admin") {
+    //             navigate("/admin_home");
+    //         } else {
+    //             navigate(`/customer/${foundUser.id}`);
+    //         }
+
+    //     } catch (error) {
+    //         console.error("Login error:", error);
+    //         setErrorMessage("A system error occurred. Please try again later.");
+    //         setIsModalOpen(true);
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
+
+        const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // Kiểm tra input cơ bản
         if (email.trim() === "" || password.trim() === "") {
             setErrorMessage("Please enter your email and password.");
             setIsModalOpen(true);
@@ -48,51 +104,66 @@ const LoginForm = () => {
         }
 
         setIsLoading(true);
-
         setErrorMessage("");
 
         try {
-            const response = await fetch(API_URL);
-            if (!response.ok) throw new Error("Could not connect to API");
-
-            const users: User[] = await response.json();
-            const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-            if (!foundUser) {
-                setErrorMessage("Email not found.");
-                setIsModalOpen(true);
-                return;
-            }
-
-            if (password !== "123456") {
-                setErrorMessage("Incorrect password.");
-                setIsModalOpen(true);
-                return;
-            }
-
-            // ✅ Lưu thông tin user vào AuthContext
-            login({
-                id: foundUser.id,
-                role: foundUser.role,
-                name: foundUser.name,
-                email: foundUser.email,
+            // --- Bước 1: Đăng nhập bằng Supabase Auth ---
+            // Thao tác này sẽ kiểm tra email và password_hash trong 'auth.users'
+            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
             });
 
-            // ✅ Chuyển hướng theo role
-            if (foundUser.role === "admin") {
-                navigate("/admin_home");
-            } else {
-                navigate(`/customer/${foundUser.id}`);
+            // Nếu Supabase trả về lỗi (sai pass, user không tồn tại)
+            if (authError) {
+                setErrorMessage(authError.message);
+                setIsModalOpen(true);
+                return;
             }
 
-        } catch (error) {
+            // --- Bước 2: Lấy hồ sơ (profile) đầy đủ bằng RPC ---
+            // Nếu đăng nhập thành công, gọi hàm 'get_my_profile'
+            // Hàm này tự động biết auth.id (nhờ session ở Bước 1)
+            const { data: profileArray, error: rpcError } = await supabase
+                .rpc('get_my_profile'); 
+            if (rpcError) {
+                // Lỗi này xảy ra nếu hàm RPC bị lỗi
+                setErrorMessage("Could not fetch user profile: " + rpcError.message);
+                setIsModalOpen(true);
+                return;
+            }
+
+            const userProfile = profileArray ? profileArray[0] as User : null;
+
+            // 'userProfile' CHÍNH LÀ JSON MÀ BẠN MUỐN
+            // { id, name, role, email, phone, ... }
+            if (!userProfile) {
+                setErrorMessage("User profile not found. Please contact support.");
+                setIsModalOpen(true);
+                return;
+            }
+
+            // --- Bước 3: Lưu vào Context và Chuyển hướng ---
+            // Dùng userProfile (đã bao gồm 'role') để gọi hàm login từ Context
+            login(userProfile); 
+
+            if (userProfile.role === "admin") {
+                navigate("/admin_home");
+            } else {
+                // Chuyển hướng user/designer...
+                navigate(`/customer/${userProfile.id}`);
+            }
+
+        } catch (error: any) {
+            // Bắt các lỗi chung
             console.error("Login error:", error);
-            setErrorMessage("A system error occurred. Please try again later.");
+            setErrorMessage(error.message || "A system error occurred.");
             setIsModalOpen(true);
         } finally {
             setIsLoading(false);
         }
     };
+
 
     // Component Modal
     const ErrorModal: React.FC = () => {
