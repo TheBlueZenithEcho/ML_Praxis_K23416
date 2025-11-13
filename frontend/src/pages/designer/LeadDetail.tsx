@@ -157,7 +157,7 @@ const LeadDetailPage: React.FC = () => {
               <LeadStatusBadge status={lead.status} />
             </div>
             {/* (Action Buttons giữ nguyên) */}
-            {lead.status !== LeadStatus.CONVERTED && lead.LOCKED_OR_CANCELLED_LOGIC && (
+            {lead.status !== LeadStatus.CONVERTED && lead.status !== LeadStatus.CANCELLED && (
               <div className="flex gap-2">
                  {/* ... (các nút Reject/Accept) ... */}
                  <button
