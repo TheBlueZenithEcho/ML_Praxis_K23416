@@ -54,8 +54,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 CREATE OR REPLACE FUNCTION "public"."get_my_profile"() RETURNS TABLE("id" "uuid", "img" "text", "name" "text", "role" "text", "email" character varying, "phone" "text", "createdat" timestamp with time zone)
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
+    AS $$BEGIN
     RETURN QUERY
     SELECT
         p.id,
@@ -63,7 +62,7 @@ BEGIN
         p.name,
         r.role_name AS role,
         u.email,
-        u.phone,
+        p.phone,
         u.created_at AS createdAt
     FROM
         public.profiles p
@@ -74,8 +73,7 @@ BEGIN
     WHERE
         p.id = auth.uid()
     LIMIT 1;
-END;
-$$;
+END;$$;
 
 
 ALTER FUNCTION "public"."get_my_profile"() OWNER TO "postgres";
@@ -144,7 +142,8 @@ CREATE TABLE IF NOT EXISTS "public"."profiles" (
     "status" "text" DEFAULT 'active'::"text" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"(),
     "updated_at" timestamp with time zone DEFAULT "now"(),
-    "role_id" "uuid"
+    "role_id" "uuid",
+    "phone" "text"
 );
 
 
@@ -220,6 +219,12 @@ ALTER TABLE ONLY "public"."role_permissions"
 
 ALTER TABLE ONLY "public"."role_permissions"
     ADD CONSTRAINT "role_permissions_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE CASCADE;
+
+
+
+CREATE POLICY "Allow authenticated users to insert customer profile" ON "public"."profiles" FOR INSERT TO "authenticated" WITH CHECK ((("auth"."uid"() = "id") AND ("role_id" = ( SELECT "roles"."id"
+   FROM "public"."roles"
+  WHERE ("roles"."role_name" = 'customer'::"text")))));
 
 
 
