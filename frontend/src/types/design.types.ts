@@ -39,27 +39,27 @@ export interface Design {
   description: string;
   images: string[]; // Array of image URLs
   thumbnailImage: string; // Main thumbnail
-  
+
   // Classification
   roomType: RoomType;
   style: DesignStyle;
   tags?: string[];
-  
+
   // Products associated with this design
   productIds: string[]; // References to products
-  
+
   // Approval workflow
   status: DesignStatus;
   submittedAt?: string;
   reviewedAt?: string;
   reviewedBy?: string; // Admin ID
   rejectionReason?: string;
-  
+
   // Metadata
   views: number;
   likes: number;
   consultationRequests: number; // Số lần khách hàng nhấn "Tư vấn"
-  
+
   createdAt: string;
   updatedAt: string;
 }

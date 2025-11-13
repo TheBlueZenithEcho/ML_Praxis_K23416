@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Button from "../../components/Button";
+import Button from "../Button";
 
 interface LoginRequiredModalProps {
     show: boolean;
@@ -12,7 +12,7 @@ const LoginRequiredModal: React.FC<LoginRequiredModalProps> = ({ show, onClose }
         <AnimatePresence>
             {show && (
                 <motion.div
-                    className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+                    className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-[10000]"
                     onClick={onClose}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -50,7 +50,7 @@ const LoginRequiredModal: React.FC<LoginRequiredModalProps> = ({ show, onClose }
                         </p>
 
                         {/* Nút Sign In */}
-                        <div className="flex justify-center">
+                        <div className="flex justify-center gap-3">
                             <Button to="/SignIn">
                                 Sign In
                             </Button>

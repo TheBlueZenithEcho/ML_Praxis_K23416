@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../../context/AuthContext"; // ✅ dùng context thay cho Zustand
 
 // 🧩 Định nghĩa kiểu dữ liệu của người dùng
 interface User {

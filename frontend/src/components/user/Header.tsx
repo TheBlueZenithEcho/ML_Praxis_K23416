@@ -1,7 +1,9 @@
 import React from "react";
 import ResponsiveMenu from "./ResponsiveMenu";
 import { useEffect } from "react"
-import Button from "../../components/Button";
+import Button from "../Button";
+import { Link } from "react-router-dom";
+
 
 const Header = () => {
     const [open, setOpen]= React.useState(false);
@@ -48,21 +50,43 @@ const Header = () => {
                                         className="absolute left-0 top-full hidden group-hover:block bg-white text-[#143E08]  rounded-lg  w-40 z-20 transition-all duration-300 opacity-0 group-hover:opacity-100  shadow-[0_10px_20px_-5px_rgba(0,0,0,0.15)]"
                                         style={{
                                             boxShadow: '0 8px 16px -4px rgba(0,0,0,0.15)' ,
-                                            marginTop: '2px'
                                         }}
                                     >
-                                        <li><a href="/BedRoom" className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold">Bedroom</a></li>
-                                        <li><a href="/LivingRoom" className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold">Living Room</a></li>
-                                        <li><a href="/Kitchen" className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold">Kitchen</a></li>
+                                        <li>
+                                            <Link
+                                                to="/bedroom"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                            >
+                                                Bedroom
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link
+                                                to="/livingroom"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                            >
+                                                Living Room
+                                            </Link>
+                                        </li>
+                                        <li >
+                                            <Link
+                                                to="/kitchen"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                            >
+                                                Kitchen
+                                            </Link>
+                                        </li>
                                     </ul>
                             </li>
-                                <li className="text-center"><a href="#" className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition-colors duration-300">Contact</a></li>
+                                <li>
+                                    <Link to="/contact" className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition">Contact</Link>
+                                </li>
                             </ul>
                         </div>
                         {/* Icons section */}
 
                         <div className="flex items-center gap-4" >
-                            <Button to="/SignIn">
+                            <Button to="/SignUp">
                                 Sign Up
                             </Button>     
                                 {/* Mobile hamburger Menu section */}

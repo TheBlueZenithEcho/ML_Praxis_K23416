@@ -1,7 +1,7 @@
 import React from "react";
 import ResponsiveMenu from "./ResponsiveMenu";
 import { useEffect } from "react"
-import Button from "../../components/Button";
+import Button from "../Button";
 
 const Header = () => {
     const [open, setOpen] = React.useState(false);

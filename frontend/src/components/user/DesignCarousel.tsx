@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import LoginRequiredModal from "./LoginRequiredModal";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 interface Design {
     id: number;
@@ -24,17 +24,28 @@ const DesignCarousel: React.FC<DesignCarouselProps> = ({ designs, loading, error
     const { user } = useAuth(); // ✅ Lấy user từ context
 
     // 👉 Khi nhấn nút "add"
-    const handleAddClick = (designId: number) => {
+    const handleAddClick = (design: Design) => {
         if (!user) {
-            // ❌ Nếu chưa đăng nhập → mở modal
             setShowModal(true);
+            return;
+        }
+
+        const key = `designTab_${user.id}`;
+        const saved: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
+
+        // Tránh duplicate
+        const exists = saved.some((d) => d.id === design.id);
+        if (!exists) {
+            const updated = [...saved, design];
+            localStorage.setItem(key, JSON.stringify(updated));
+            console.log(`Design "${design.name}" đã được thêm vào Design Tab của ${user.name}`);
+
+            // --- THÊM DÒNG NÀY ---
+            window.dispatchEvent(new Event("designTabChange")); // báo các component khác update
         } else {
-            // ✅ Nếu đã đăng nhập → thực hiện hành động khác
-            console.log(`Người dùng ${user.name} thêm design có ID: ${designId}`);
-            // Sau này có thể gọi API ở đây
+            console.log(`Design "${design.name}" đã tồn tại trong Design Tab`);
         }
     };
-
     const scrollLeft = () => {
         scrollContainerRef.current?.scrollBy({
             left: -scrollContainerRef.current.clientWidth,
@@ -92,7 +103,7 @@ const DesignCarousel: React.FC<DesignCarouselProps> = ({ designs, loading, error
                                         loading="lazy"
                                     />
                                     <button
-                                        onClick={() => handleAddClick(design.id)}
+                                        onClick={() => handleAddClick(design)}
                                         className="absolute bottom-4 right-4 bg-black text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                     >
                                         <i className="bi bi-house-add-fill text-xl"></i>

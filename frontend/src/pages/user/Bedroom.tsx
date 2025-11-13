@@ -1,6 +1,6 @@
 // src/pages/Bedroom.tsx
-import DesignGrid from "@/components/user/DesignGrid";
 import React from "react";
+import DesignGrid from "../../components/user/DesignGrid";
 
 const BedRoom = () => {
     return (

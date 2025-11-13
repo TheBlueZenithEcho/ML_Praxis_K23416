@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import LoginRequiredModal from "./LoginRequiredModal";
+import { useAuth } from "../../context/AuthContext";
 
 const API_URL = "https://api.npoint.io/3619c3ea1583a5bd1216";
 
@@ -17,6 +18,7 @@ interface DesignGridProps {
 }
 
 const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
+    const { user } = useAuth(); //  Lấy user từ context
     const [designs, setDesigns] = useState<Design[]>([]);
     const [visibleDesigns, setVisibleDesigns] = useState<Design[]>([]);
     const [loading, setLoading] = useState(true);
@@ -39,16 +41,11 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
                     (design) => design["type room"]?.toLowerCase() === categoryFilter
                 );
 
-                // Hiển thị ngay 12 mẫu đầu tiên
                 setVisibleDesigns(filteredData.slice(0, 12));
                 setDesigns(filteredData);
 
-                // Sau 1.5s load dần phần còn lại (background)
-                setTimeout(() => {
-                    setVisibleDesigns(filteredData);
-                }, 1500);
+                setTimeout(() => setVisibleDesigns(filteredData), 1500);
             } catch (err: any) {
-                console.error("Lỗi khi tải thiết kế:", err);
                 setError(err.message || "Đã có lỗi xảy ra");
             } finally {
                 setLoading(false);
@@ -57,6 +54,29 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
 
         fetchDesigns();
     }, [category]);
+
+    const handleAddClick = (design: Design) => {
+        if (!user) {
+            setShowModal(true);
+            return;
+        }
+
+        const key = `designTab_${user.id}`;
+        const saved: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
+
+        // Tránh duplicate
+        const exists = saved.some((d) => d.id === design.id);
+        if (!exists) {
+            const updated = [...saved, design];
+            localStorage.setItem(key, JSON.stringify(updated));
+            console.log(`Design "${design.name}" đã được thêm vào Design Tab của ${user.name}`);
+
+            // --- THÊM DÒNG NÀY ---
+            window.dispatchEvent(new Event("designTabChange")); // báo các component khác update
+        } else {
+            console.log(`Design "${design.name}" đã tồn tại trong Design Tab`);
+        }
+    };
 
     if (loading)
         return (
@@ -79,7 +99,6 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
             </div>
         );
 
-    // Chia đều 4 cột
     const columns = [[], [], [], []] as Design[][];
     visibleDesigns.forEach((p, i) => {
         columns[i % 4].push(p);
@@ -104,7 +123,7 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
                                         loading="lazy"
                                     />
                                     <button
-                                        onClick={() => setShowModal(true)}
+                                        onClick={() => handleAddClick(design)}
                                         className="absolute bottom-4 right-4 bg-black text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                     >
                                         <i className="bi bi-house-add-fill text-xl"></i>

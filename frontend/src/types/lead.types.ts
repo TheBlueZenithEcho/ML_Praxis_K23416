@@ -32,37 +32,38 @@ export interface DesignRequest {
 // Main Lead interface
 export interface Lead {
   id: string;
+  type: 'lead';
   customerId: string;
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
   customerAvatar?: string;
-  
+
   // Assignment
   designerId?: string; // Admin có thể phân công
   designerName?: string;
-  
+
   // Design requests grouped by room type
   // Key: room type, Value: array of design requests
   designRequests: Record<RoomType, DesignRequest[]>;
-  
+
   // Lead info
   status: LeadStatus;
   priority: LeadPriority;
   budget?: number;
   preferredStyle?: string[];
-  
+
   // Timeline
   firstContactAt: string;
   lastContactAt: string;
   convertedAt?: string; // Khi chuyển thành Project
   cancelledAt?: string;
   cancellationReason?: string;
-  
+
   // Metrics
   totalMessages: number;
   averageResponseTime?: number; // minutes
-  
+
   createdAt: string;
   updatedAt: string;
 }

@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import ResponsiveMenu from "./ResponsiveMenu";
 import DesignTab from "./DesignTab";
-import { useAuth } from "@/context/AuthContext";
-// import { useAuth } from "../src/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 interface CusHeaderProps {
-    customerId: number | undefined; // ⚡ số hoặc undefined
+    customerId: number | undefined; // số hoặc undefined
 }
 
 interface User {
@@ -90,7 +89,37 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
         fetchUserData();
     }, [customerId]);
 
-    // render safe URL
+    // Load số lượng design từ localStorage và lắng nghe event update
+    useEffect(() => {
+        if (!customerId) {
+            setDesignCount(0);
+            return;
+        }
+
+        const key = `designTab_${customerId}`;
+
+        // Hàm cập nhật số lượng hiện tại
+        const updateCount = () => {
+            const saved: any[] = JSON.parse(localStorage.getItem(key) || "[]");
+            setDesignCount(saved.length);
+        };
+
+        // Load lần đầu
+        updateCount();
+
+        // Lắng nghe khi designTab thay đổi
+        window.addEventListener("designTabChange", updateCount);
+
+        // Lắng nghe event khi designs được gửi sang ConsultationPage
+        const handleSendDesignsToChat = () => setDesignCount(0);
+        window.addEventListener("sendDesignsToChat", handleSendDesignsToChat);
+
+        return () => {
+            window.removeEventListener("designTabChange", updateCount);
+            window.removeEventListener("sendDesignsToChat", handleSendDesignsToChat);
+        };
+    }, [customerId]);
+
     const safeCustomerLink = customerId !== undefined ? `/customer/${customerId}` : "/";
 
     return (
@@ -123,19 +152,39 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                                         </span>
                                     </button>
                                     <ul className="top-[100%] absolute left-0 hidden group-hover:block bg-white text-[#143E08] rounded-lg w-40 z-20 opacity-0 group-hover:opacity-100 shadow-md transition">
-                                        <li className="">
-                                            <Link to={`/customer/${customerId}/bedroom`} className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link">Bedroom</Link>
+                                        <li>
+                                            <Link
+                                                to={customerId ? `/customer/${customerId}/bedroom` : "/bedroom"}
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                            >
+                                                Bedroom
+                                            </Link>
                                         </li>
-                                        <li className="">
-                                            <Link to={`/customer/${customerId}/livingroom`} className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link">Living Room</Link>
+                                        <li>
+                                            <Link
+                                                to={customerId ? `/customer/${customerId}/livingroom` : "/livingroom"}
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                            >
+                                                Living Room
+                                            </Link>
                                         </li>
-                                        <li className="">
-                                            <Link to={`/customer/${customerId}/kitchen`} className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link">Kitchen</Link>
+                                        <li>
+                                            <Link
+                                                to={customerId ? `/customer/${customerId}/kitchen` : "/kitchen"}
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                            >
+                                                Kitchen
+                                            </Link>
                                         </li>
                                     </ul>
                                 </li>
                                 <li>
-                                    <Link to="/contact" className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition">Contact</Link>
+                                    <Link
+                                        to={customerId ? `/customer/${customerId}/contact` : "/contact"}
+                                        className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition"
+                                    >
+                                        Contact
+                                    </Link>
                                 </li>
                             </ul>
                         </div>
@@ -145,7 +194,11 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                             {/* DesignTab */}
                             <div className="relative">
                                 <i className="bi bi-house-add-fill text-2xl hover:text-green-700 transition cursor-pointer" onClick={handleToggleDesignTab}></i>
-                                <span className="absolute top-2/3 right-1/2 bg-[#1A4B0C] text-[#FDFBCE] text-sm w-4 h-4 rounded-full flex justify-center items-center">{designCount}</span>
+                                {designCount > 0 && (
+                                    <span className="absolute top-2/3 right-1/2 bg-[#1A4B0C] text-[#FDFBCE] text-sm w-4 h-4 rounded-full flex justify-center items-center">
+                                        {designCount}
+                                    </span>
+                                )}
                             </div>
 
                             {/* Chat */}

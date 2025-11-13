@@ -40,35 +40,35 @@ export interface MessageAttachment {
 export interface Message {
   id: string;
   chatId: string;           // Lead ID or Project ID
-  
+
   // Sender
-  senderId: string;
+  senderId: number | string;
   senderRole: SenderRole;
   senderName: string;
   senderAvatar?: string;
-  
+
   // Message content
   type: MessageType;
   content: string;          // Text content or description
   attachments?: MessageAttachment[];
-  
+
   // Status
   status: MessageStatus;
-  
+
   // Metadata
   isEdited: boolean;
   editedAt?: string;
   isDeleted: boolean;
   deletedAt?: string;
-  
+
   // Reply/Thread
   replyToId?: string;       // If replying to another message
-  
+
   // Timestamps
   sentAt: string;
   deliveredAt?: string;
   readAt?: string;
-  
+
   createdAt: string;
   updatedAt: string;
 }
@@ -78,24 +78,24 @@ export interface Chat {
   id: string;
   type: 'lead' | 'project';
   referenceId: string;      // Lead ID or Project ID
-  
+
   // Participants
   participants: ChatParticipant[];
-  
+
   // Last message
   lastMessage?: Message;
   lastMessageAt?: string;
-  
+
   // Unread count
   unreadCount: Record<string, number>; // userId: count
-  
+
   // Status
   isActive: boolean;
   isLocked: boolean;        // True when project completed
-  
+
   // Typing indicator
   typingUsers?: string[];   // Array of user IDs currently typing
-  
+
   createdAt: string;
   updatedAt: string;
 }

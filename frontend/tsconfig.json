@@ -30,7 +30,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     // ⚙️ Bỏ cảnh báo deprecation lặt vặt
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "6.0"
   },
   // ✅ Theo dõi toàn bộ code trong src/
   "include": [

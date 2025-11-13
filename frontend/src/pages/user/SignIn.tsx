@@ -1,7 +1,6 @@
-import Header from '@/components/user/Header'
-import LoginForm from '@/components/user/LoginForm'
 import React from 'react'
-
+import Header from '../../components/user/Header'
+import LoginForm from '../../components/user/LoginForm'
 
 const SignIn = () => {
     return (

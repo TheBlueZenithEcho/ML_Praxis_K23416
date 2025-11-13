@@ -1,6 +1,6 @@
 // src/components/DesignItem.tsx
 import React from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 interface Design {
     id: number;

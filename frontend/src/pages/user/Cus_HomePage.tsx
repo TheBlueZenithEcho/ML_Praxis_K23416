@@ -1,9 +1,8 @@
-import Catalog from "@/components/user/Catalog";
-import Features from "@/components/user/Features";
-import Footer from "@/components/user/Footer";
-import Hero from "@/components/user/Hero";
 import React from "react";
-
+import Hero from "../../components/user/Hero";
+import Features from "../../components/user/Features";
+import Catalog from "../../components/user/Catalog";
+import Footer from "../../components/user/Footer";
 
 const Cus_HomePage = () => {
     return (

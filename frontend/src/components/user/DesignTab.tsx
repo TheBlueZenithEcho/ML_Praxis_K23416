@@ -1,8 +1,9 @@
 // src/components/DesignTab.tsx
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import DesignItem from "./DesignItem"; // component con (mình có ví dụ bên dưới)
 import LoginRequiredModal from "./LoginRequiredModal";
-import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router";
 
 interface Design {
     id: number;
@@ -18,13 +19,15 @@ interface DesignTabProps {
     onClose: () => void;
 }
 
+
+
 const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
     const { user } = useAuth();
     const [items, setItems] = useState<Design[]>([]);
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const navigate = useNavigate();
 
-    // load khi mount hoặc user thay đổi hoặc open true
-    useEffect(() => {
+    const loadItems = () => {
         if (!user) {
             setItems([]);
             return;
@@ -32,15 +35,23 @@ const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
         const key = `designTab_${user.id}`;
         const saved: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
         setItems(saved);
-    }, [user, open]);
+    };
+
+    // Load khi mount / user thay đổi / mở tab
+    useEffect(() => {
+        loadItems();
+        window.addEventListener("designTabChange", loadItems);
+        return () => window.removeEventListener("designTabChange", loadItems);
+    }, [user]);
 
     const handleRemove = (id: number) => {
         if (!user) return;
         const key = `designTab_${user.id}`;
         const saved: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
-        const updated = saved.filter((d: Design) => d.id !== id);
+        const updated = saved.filter((d) => d.id !== id);
         localStorage.setItem(key, JSON.stringify(updated));
         setItems(updated);
+        window.dispatchEvent(new Event("designTabChange"));
     };
 
     const handleClearAll = () => {
@@ -51,13 +62,40 @@ const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
         const key = `designTab_${user.id}`;
         localStorage.removeItem(key);
         setItems([]);
+        // Dispatch event để header cập nhật badge ngay
+        window.dispatchEvent(new Event("sendDesignsToChat"));
+        window.dispatchEvent(new Event("designTabChange"));
     };
 
-    // nếu bạn muốn khi chưa login mà bấm mở tab thì show modal:
+    //
+    const handleSendDesignsToChat = () => {
+        if (!user) return;
+        const key = `designTab_${user.id}`;
+        const savedDesigns = JSON.parse(localStorage.getItem(key) || '[]') as Design[];
+        if (savedDesigns.length === 0) return;
+
+        // Lưu designs tạm cho ConsultationPage
+        localStorage.setItem(`pendingDesigns_${user.id}`, JSON.stringify(savedDesigns));
+
+        // ✅ Dispatch event **trước khi xóa**
+        window.dispatchEvent(new Event("sendDesignsToChat"));
+
+        // Xóa designTab
+        localStorage.removeItem(key);
+        setItems([]);
+
+        // Thông báo update header
+        window.dispatchEvent(new Event("designTabChange"));
+
+        // Đóng tab
+        onClose();
+
+        // Chuyển trang
+        navigate(`/customer/${user.id}/consultation`);
+    };
+
     useEffect(() => {
-        if (open && !user) {
-            setShowLoginModal(true);
-        }
+        if (open && !user) setShowLoginModal(true);
     }, [open, user]);
 
     return (
@@ -85,8 +123,40 @@ const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
                 </div>
 
                 <div className="p-4 border-t grid grid-cols-2 gap-2">
-                    <button onClick={handleClearAll} className="bg-red-500 text-white py-2 rounded">Clear</button>
-                    <button className="bg-green-600 text-white py-2 rounded">Go to Design Tab Page</button>
+                    <button
+                        onClick={handleClearAll}
+                        className="bg-red-500 text-white py-2 rounded"
+                    >
+                        Clear
+                    </button>
+                    <button
+    onClick={() => {
+        if (!user) return;
+
+        const key = `designTab_${user.id}`;
+        const savedDesigns: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
+        if (savedDesigns.length === 0) return;
+
+        // Lưu tạm designs
+        localStorage.setItem(`pendingDesigns_${user.id}`, JSON.stringify(savedDesigns));
+
+        // ✅ Thông báo header trước khi xóa localStorage
+        window.dispatchEvent(new Event("sendDesignsToChat"));
+
+        // Xóa designTab
+        localStorage.removeItem(key);
+        setItems([]);
+
+        // Đóng tab
+        onClose();
+
+        // Chuyển sang ConsultationPage
+        navigate(`/customer/${user.id}/consultation`);
+    }}
+    className="bg-green-600 text-white py-2 rounded"
+>
+    Consultation Page
+</button>
                 </div>
             </div>
         </>

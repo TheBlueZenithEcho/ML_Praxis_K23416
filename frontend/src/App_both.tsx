@@ -11,7 +11,7 @@ import {
 import { Toaster } from 'sonner';
 
 // --- CSS ---
-import "./index.css" 
+import "./index.css";
 
 // --- Context ---
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -30,9 +30,12 @@ import NotFound from "./pages/user/NotFound";
 import LivingRoom from "./pages/user/LivingRoom";
 import BedRoom from "./pages/user/Bedroom";
 import Kitchen from "./pages/user/Kitchen";
+import ContactPage from './pages/user/Contact';
+import About from './pages/user/About';
 
 // --- Customer Pages (Người dùng đã đăng nhập) ---
 import Cus_HomePage from "./pages/user/Cus_HomePage";
+import ConsultationPage from './pages/user/ConsultationPage';
 
 // --- Admin Pages ---
 import Ad_Home from './pages/admin/Ad_Home';
@@ -126,9 +129,12 @@ const router = createBrowserRouter([
       { path: "/", element: <HomePage /> },
       { path: "/SignIn", element: <SignIn /> },
       { path: "/SignUp", element: <SignUp /> },
-      { path: "/LivingRoom", element: <LivingRoom /> },
-      { path: "/BedRoom", element: <BedRoom /> },
-      { path: "/Kitchen", element: <Kitchen /> },
+      { path: "/livingRoom", element: <LivingRoom /> },
+      { path: "/bedRoom", element: <BedRoom /> },
+      { path: "/kitchen", element: <Kitchen /> },
+      { path: "/contact", element: <ContactPage /> },
+      { path: "/about", element: <About /> },
+
     ],
   },
 
@@ -144,8 +150,15 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Cus_HomePage /> },
+      { path: "contact", element: <ContactPage /> },
+      { path: "livingRoom", element: <LivingRoom /> },
+      { path: "bedRoom", element: <BedRoom /> },
+      { path: "kitchen", element: <Kitchen /> },
+      { path: "consultation", element: (<ConsultationPage />), }
+
     ],
   },
+
 
   /**
    * 3. ADMIN LAYOUT (Bảo vệ)
