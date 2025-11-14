@@ -1,43 +1,42 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-// Sửa: Đổi sang react-router-dom
-import { Link } from 'react-router'; 
-import { TextField, InputAdornment, Avatar, IconButton } from '@mui/material'; 
+import { Link } from 'react-router-dom'; // Import từ 'react-router-dom'
+import { TextField, InputAdornment, Avatar, IconButton } from '@mui/material';
 import { DataGrid, type GridColDef, type GridRenderCellParams } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { EditIcon } from 'lucide-react';
+import { Edit as EditIcon } from 'lucide-react'; // Đổi tên 'EditIcon' để tránh trùng
 
-// --- API URLs ---
-const MOCK_API_GET_URL = 'https://api.npoint.io/4a915d88732882680a44'; 
+// Import Supabase client
+import { supabase } from '../../lib/supabaseClient';
 
-// Kiểu dữ liệu (Giữ nguyên)
+// Cập nhật Interface để khớp 100% với SQL View 'all_designers'
 type DesignerData = {
-    id: number; img: string; name: string; email: string; phone: string; createdAt: string;
-    role: 'user' | 'designer' | 'admin'; 
+    id: string;         // p.id (uuid -> string)
+    img: string | null; // p.avatar_url (text -> string | null)
+    name: string | null;// p.name (text -> string | null)
+    role: string;       // r.role_name (text -> string)
+    email: string;      // u.email (text -> string)
+    phone: string | null; // u.phone (text -> string | null)
+    createdAt: string;  // u.created_at (timestamptz -> string)
 };
 
-// Hàm tạo link profile (Giữ nguyên)
+// Hàm tạo link (Đã đơn giản hóa vì view này CHỈ trả về designer)
 const getProfileLink = (user: DesignerData): string => {
-    switch (user.role) {
-        case 'admin': return `/admin/${user.id}`;
-        case 'designer': return `/desad/${user.id}`;
-        case 'user': default: return `/users/${user.id}`;
-    }
+    return `/desad/${user.id}`;
 };
 
-
-
-// Định nghĩa cột (Giữ nguyên)
-const designersColumns: GridColDef<DesignerData>[] = [ 
+// Định nghĩa cột (Không đổi)
+const designersColumns: GridColDef<DesignerData>[] = [
     { field: 'id', headerName: 'ID', width: 60 },
-    { 
-        field: 'img', headerName: 'Avatar', width: 100, 
+    {
+        field: 'img', headerName: 'Avatar', width: 100,
         renderCell: (params: GridRenderCellParams<DesignerData>) => (
             <div className="w-full h-full flex items-center justify-center">
-                <Link to={getProfileLink(params.row)}> 
-                    <Avatar src={params.value as string} /> 
+                <Link to={getProfileLink(params.row)}>
+                    {/* Sửa: Thêm `|| undefined` để xử lý null */}
+                    <Avatar src={params.value || undefined} />
                 </Link>
-            </div> 
+            </div>
         ),
         sortable: false, filterable: false, align: 'center', headerAlign: 'center',
     },
@@ -48,57 +47,89 @@ const designersColumns: GridColDef<DesignerData>[] = [
 ];
 
 const DesignersTable = () => {
-    const [allDesigners, setAllDesigners] = useState<DesignerData[]>([]); 
+    const [allDesigners, setAllDesigners] = useState<DesignerData[]>([]);
     const [searchText, setSearchText] = useState("");
     const [loading, setLoading] = useState(true);
-    
-    // Xử lý Delete (Giữ nguyên)
-    const handleDelete = useCallback((id: number) => {
-        if (window.confirm(`(Giả lập) Bạn có chắc muốn xóa designer ${id}?`)) {
-            setAllDesigners((prevDesigners) => prevDesigners.filter((row) => row.id !== id));
+
+    // Xử lý Delete (Gọi RPC an toàn)
+    const handleDelete = useCallback(async (id: string, name: string | null) => {
+        if (window.confirm(`Bạn có chắc muốn xóa vĩnh viễn designer "${name || id}"?`)) {
+            setLoading(true);
+            try {
+                // Gọi hàm RPC 'delete_user_as_admin' đã tạo ở File 1
+                const { error } = await supabase.rpc('delete_user_as_admin', {
+                    user_id_to_delete: id
+                });
+
+                if (error) {
+                    // Lỗi này xảy ra nếu người gọi không phải Admin
+                    throw new Error(`Lỗi khi xóa: ${error.message}`);
+                }
+
+                // Xóa thành công, cập nhật UI
+                setAllDesigners((prevDesigners) => prevDesigners.filter((row) => row.id !== id));
+                alert(`Đã xóa thành công ${name || id}.`);
+
+            } catch (err: any) {
+                console.error("Lỗi khi xóa designer:", err);
+                alert(err.message);
+            } finally {
+                setLoading(false);
+            }
         }
     }, []);
 
-    // Cột Action (Giữ nguyên)
+    // Cột Action (Cập nhật để truyền 'name' vào handleDelete)
     const columnsWithActionDesigners = useMemo<GridColDef<DesignerData>[]>(() => [
-        ...designersColumns, 
+        ...designersColumns,
         {
-            field: 'action', headerName: 'Action', width: 150, 
+            field: 'action', headerName: 'Action', width: 150,
             sortable: false, filterable: false, align: 'center', headerAlign: 'center',
             renderCell: (params: GridRenderCellParams<DesignerData>) => (
                 <div className="w-full flex justify-center gap-2">
-                    <Link to={getProfileLink(params.row)}> 
+                    <Link to={getProfileLink(params.row)}>
                         <IconButton color="primary" title="Sửa"><EditIcon /></IconButton>
                     </Link>
-                    <IconButton color="error" title="Xóa" onClick={() => handleDelete(params.row.id)}>
+                    <IconButton color="error" title="Xóa" onClick={() => handleDelete(params.row.id, params.row.name)}>
                         <DeleteOutlineIcon />
                     </IconButton>
                 </div>
             )
         }
-    ], [handleDelete]); 
+    ], [handleDelete]);
 
-    // useEffect fetch (Giữ nguyên)
+    // useEffect fetch (Dọn dẹp logic)
     useEffect(() => {
         const fetchDesigners = async () => {
-            setLoading(true); 
+            setLoading(true);
             try {
-                const response = await fetch(MOCK_API_GET_URL); 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data: DesignerData[] = await response.json();
-                const filteredData = data.filter(user => user.role === 'designer'); 
-                setAllDesigners(filteredData); 
+                // Gọi VIEW 'all_designers'
+                const { data, error } = await supabase
+                    .from('all_designers') // View này đã filter 'designer'
+                    .select('*')
+                    .order('created_at', { ascending: false }); // Sắp xếp mới nhất lên đầu
+
+                if (error) {
+                    console.error('Lỗi khi lấy dữ liệu designers:', error);
+                    throw error;
+                }
+
+                if (data) {
+                    // Gán dữ liệu (đã được gõ 'DesignerData[]') vào state
+                    setAllDesigners(data as DesignerData[]);
+                }
+
             } catch (error) {
                 console.error("Lỗi khi fetch designers:", error);
-                setAllDesigners([]); 
+                setAllDesigners([]); // Đặt về mảng rỗng nếu lỗi
             } finally {
-                setLoading(false); 
+                setLoading(false);
             }
         };
         fetchDesigners();
-    }, []); 
+    }, []); // Chỉ chạy 1 lần khi component mount
 
-    // Logic filter (Giữ nguyên)
+    // Logic filter (Cập nhật để xử lý 'null')
     const filteredRows = useMemo(() => {
         if (!searchText) return allDesigners;
         const lowerCaseSearch = searchText.toLowerCase();
@@ -110,25 +141,22 @@ const DesignersTable = () => {
         });
     }, [searchText, allDesigners]);
 
-    // *** SỬA LỖI TẠI ĐÂY ***
+    // JSX (Giữ nguyên như code của bạn)
     return (
-        // Thêm 'bg-white rounded shadow' vào div gốc này
-        <div className='DesignersTable flex flex-col h-full w-full bg-white rounded shadow'> 
-             {/* Thanh tìm kiếm giờ sẽ nằm bên trong nền trắng */}
-             <div className="flex justify-between items-center px-4 pt-4 pb-2 flex-shrink-0">
-                 <div className="w-[300px] ml-auto">
-                     <TextField fullWidth variant="standard" placeholder="Search Designers..." value={searchText}
+        <div className='DesignersTable flex flex-col h-full w-full bg-white rounded shadow'>
+            <div className="flex justify-between items-center px-4 pt-4 pb-2 flex-shrink-0">
+                <div className="w-[300px] ml-auto">
+                    <TextField fullWidth variant="standard" placeholder="Search Designers..." value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>), }}
-                     />
-                 </div>
-             </div>
-            
-            {/* Bảng DataGrid */}
-            <div className="flex-grow w-full overflow-hidden px-4 pb-4"> 
+                    />
+                </div>
+            </div>
+
+            <div className="flex-grow w-full overflow-hidden px-4 pb-4">
                 <DataGrid
-                    rows={filteredRows} 
-                    columns={columnsWithActionDesigners} 
+                    rows={filteredRows}
+                    columns={columnsWithActionDesigners}
                     loading={loading}
                     initialState={{ pagination: { paginationModel: { page: 0, pageSize: 10 } } }}
                     pageSizeOptions={[5, 10]}
