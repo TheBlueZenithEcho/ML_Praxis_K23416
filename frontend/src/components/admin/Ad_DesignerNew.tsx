@@ -1,23 +1,31 @@
 import React, { useState, useRef } from 'react';
-// Sửa import nếu bạn dùng react-router-dom v6+
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Avatar, CircularProgress } from '@mui/material';
 
-// --- API URLs ---
-// (1) API Giả lập (không dùng cho POST)
-// (2) API Thật (comment lại - URL để tạo user/designer)
-// const REAL_API_BASE_URL = 'https://your-real-backend.com'; // !!! THAY BẰNG API THẬT CỦA BẠN !!!
-// const REAL_API_CREATE_ENDPOINT = `${REAL_API_BASE_URL}/users`; // Hoặc /designers tùy backend
-// const REAL_API_UPLOAD_ENDPOINT = `${REAL_API_BASE_URL}/upload/avatar`; // Ví dụ endpoint upload ảnh
-// -----------------
+// --- (1) IMPORT SUPABASE CLIENT ---
+import { supabase } from '../../lib/supabaseClient';
 
-// Kiểu dữ liệu cho form (cần các trường mà API TẠO yêu cầu)
+// --- (2) CHÚ Ý: ĐIỀN PUBLIC URL CỦA R2 VÀO ĐÂY ---
+// Đây là URL công khai của R2 Bucket (đã setup ở Giai đoạn 3 của file setup_cloudflare_r2.md)
+// Nó KHÁC với R2_ENDPOINT.
+const R2_PUBLIC_URL = 'https://pub-015964f37f3f4529a8e04997ed43d343.r2.dev'; // !!! THAY BẰNG URL PUBLIC CỦA BẠN !!!
+
+// Kiểu dữ liệu cho form
 type NewDesignerData = {
   name: string;
   email: string;
   phone: string;
-  img: string;
-  role: 'designer'; // Vai trò mặc định
+  img: string; // Dùng cho URL nhập tay
+  role: 'designer';
+};
+
+// --- (3) HÀM TIỆN ÍCH ĐỂ FORMAT TÊN FILE ---
+/**
+ * Chuyển email thành tên file an toàn.
+ * "manning@gmail.com" -> "manning_at_gmail_com"
+ */
+const formatEmailToFilename = (email: string) => {
+  return email.replace(/@/g, '_at_').replace(/\./g, '_');
 };
 
 const Ad_DesignerNew = () => {
@@ -25,169 +33,175 @@ const Ad_DesignerNew = () => {
   const [formData, setFormData] = useState<NewDesignerData>({
     name: '', email: '', phone: '', img: '', role: 'designer'
   });
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-
-   // State cho việc upload ảnh
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null); // Ref đến input file ẩn
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Xử lý thay đổi input trong form
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // Xử lý khi người dùng chọn file ảnh
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
-          setSelectedFile(file); // Lưu file đã chọn
-          // Tạo URL xem trước
+          setSelectedFile(file);
           const reader = new FileReader();
-          reader.onloadend = () => setPreviewUrl(reader.result as string); // Cập nhật ảnh xem trước
+          reader.onloadend = () => setPreviewUrl(reader.result as string);
           reader.readAsDataURL(file);
       } else {
-          // Reset nếu người dùng hủy chọn
           setSelectedFile(null);
           setPreviewUrl(null);
       }
   };
-   // Kích hoạt input file ẩn khi nhấn nút
+
    const handleUploadButtonClick = () => fileInputRef.current?.click();
 
-  // CREATE - Xử lý khi submit form
+  // --- (4) LOGIC SUBMIT ĐÃ VIẾT LẠI HOÀN TOÀN ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const useRealApi = false; // <<< --- Đặt thành true khi dùng API thật
-    let imageUrlToSend = formData.img; // Mặc định dùng URL nhập tay
+    setLoading(true);
 
-    // --- Xử lý Upload Ảnh (Nếu dùng API thật) ---
-    if (selectedFile && useRealApi) {
-        /* // BỎ COMMENT KHI CÓ API THẬT
-         if (!REAL_API_UPLOAD_ENDPOINT) {
-             alert("Lỗi: API Upload thật chưa được cấu hình.");
-             return; // Dừng nếu chưa có URL upload
-         }
-         const imageFormData = new FormData();
-         imageFormData.append('avatar', selectedFile); // Key 'avatar' phụ thuộc vào backend của bạn
-         setLoading(true);
-         try {
-             console.log("Đang upload ảnh lên:", REAL_API_UPLOAD_ENDPOINT);
-             const uploadRes = await fetch(REAL_API_UPLOAD_ENDPOINT, {
-                 method: 'POST',
-                 // headers: { 'Authorization': `Bearer ${token}` }, // Thêm Auth nếu cần
-                 body: imageFormData
-             });
-             if (!uploadRes.ok) throw new Error("Upload ảnh thất bại");
-             const uploadResult = await uploadRes.json();
-             imageUrlToSend = uploadResult.imageUrl; // Lấy URL ảnh đã upload từ server
-             console.log("Upload ảnh thành công, URL:", imageUrlToSend);
-         } catch(err) {
-             console.error("Lỗi upload ảnh:", err);
-             alert("Đã xảy ra lỗi khi upload ảnh.");
-             setLoading(false); // Dừng loading nếu upload lỗi
-             return; // Dừng không gửi tiếp form
-         }
-         // setLoading(false) sẽ được gọi ở khối finally của fetch tạo designer
-        */
-        alert("API Upload thật đang bị comment trong Ad_DesignerNew.tsx"); return;
-    } else if (selectedFile && !useRealApi) {
-        // Nếu đang giả lập và có chọn file, dùng ảnh xem trước
-        imageUrlToSend = previewUrl || '';
-        console.log("Giả lập: Sử dụng ảnh xem trước cho img:", imageUrlToSend.substring(0, 50) + "..."); // Log một phần URL base64
-    }
-    // ---------------------------------------------
-
-    // --- Chuẩn bị dữ liệu gửi đi ---
-    const designerDataToSend = {
-        ...formData, // name, email, phone, role
-        img: imageUrlToSend, // Sử dụng URL ảnh đã xử lý
-        // Thêm createdAt nếu API thật yêu cầu (thường server tự tạo)
-        createdAt: new Date().toLocaleDateString('en-GB').replace(/\//g,'.') // Ví dụ format 'DD.MM.YYYY'
-    };
-    // ----------------------------
-
-    // --- Gửi dữ liệu Designer ---
-    if (useRealApi) {
-        /* // BỎ COMMENT KHI CÓ API THẬT
-         if (!REAL_API_CREATE_ENDPOINT) {
-            alert("Lỗi: API Tạo thật chưa được cấu hình.");
-            return;
-         }
-         setLoading(true);
-         try {
-             console.log("Đang gửi POST request đến:", REAL_API_CREATE_ENDPOINT, "với data:", designerDataToSend);
-             const response = await fetch(REAL_API_CREATE_ENDPOINT, {
-                 method: 'POST',
-                 headers: { 'Content-Type': 'application/json' },
-                 body: JSON.stringify(designerDataToSend),
-             });
-             if (response.ok) {
-                 alert("Tạo designer mới thành công!");
-                 navigate('/admin_designers'); // Quay về trang danh sách designers
-             } else {
-                 const errorData = await response.text();
-                 alert(`Tạo designer thất bại: ${response.status} ${errorData || response.statusText}`);
-             }
-         } catch (error) {
-             console.error("Lỗi khi tạo designer:", error);
-             alert("Lỗi kết nối khi tạo designer.");
-         } finally {
-             setLoading(false);
-         }
-        */
-        alert("API Tạo thật đang bị comment trong Ad_DesignerNew.tsx.");
-
-    } else {
-        // (1) Giả lập (đang dùng)
-        alert("Đang giả lập việc tạo designer mới...");
-        console.log("Dữ liệu (giả lập) sẽ được gửi:", designerDataToSend);
-        setLoading(true);
-        // Chờ 1.5 giây để mô phỏng gọi API
-        await new Promise(resolve => setTimeout(resolve, 1500));
+    if (!formData.email || !password || !formData.name) {
+        alert("Vui lòng điền Email, Mật khẩu và Tên.");
         setLoading(false);
-        alert("Giả lập tạo designer thành công!");
-        navigate('/admin_designers'); // Quay về trang danh sách designers
+        return;
     }
-    // -------------------------
+
+    try {
+        // --- BƯỚC 1: LẤY ROLE_ID CỦA 'designer' ---
+        const { data: roleData, error: roleError } = await supabase
+            .from('roles')
+            .select('id')
+            .eq('role_name', 'designer')
+            .single();
+
+        if (roleError || !roleData) {
+            throw new Error("Lỗi hệ thống: Không tìm thấy vai trò 'designer'.");
+        }
+        const designerRoleId = roleData.id;
+
+        // --- BƯỚC 2: TẠO AUTH USER MỚI ---
+        // (Giả sử bạn đang dùng RLS Policy "Allow admins to create any profile")
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: formData.email,
+            password: password,
+            options: {
+                data: { name: formData.name }
+            }
+        });
+
+        if (authError) throw authError;
+        if (!authData.user) throw new Error("Không thể tạo tài khoản Auth (User).");
+        
+        const newUserId = authData.user.id;
+
+        // --- BƯỚC 3: XỬ LÝ UPLOAD ẢNH (NẾU CÓ) ---
+        let avatarUrlToSet = formData.img; // Mặc định là URL nhập tay
+
+        if (selectedFile) {
+            console.log("Đang chuẩn bị upload lên R2...");
+
+            // 3.1: Format tên file theo yêu cầu
+            const fileExtension = selectedFile.name.split('.').pop();
+            const safeFilename = formatEmailToFilename(formData.email);
+            const r2Key = `profiles/designers/${safeFilename}.${fileExtension}`;
+            
+            // 3.2: Gọi Edge Function để lấy Presigned URL
+            console.log(`Đang gọi Edge Function 'r2-presigned-upload' với key: ${r2Key}`);
+            const { data: presignedData, error: funcError } = await supabase
+                .functions
+                .invoke('r2-presigned-upload', {
+                    body: JSON.stringify({
+                        fileName: r2Key,
+                        contentType: selectedFile.type,
+                    }),
+                });
+
+            if (funcError || !presignedData.presignedUrl) {
+                throw new Error(`Lỗi lấy Presigned URL: ${funcError?.message || 'Không có URL'}`);
+            }
+
+            const { presignedUrl } = presignedData;
+
+            // 3.3: Upload file trực tiếp lên R2 bằng link vừa lấy
+            console.log("Đang PUT file trực tiếp lên R2...");
+            const r2Response = await fetch(presignedUrl, {
+                method: 'PUT',
+                body: selectedFile,
+                headers: {
+                    'Content-Type': selectedFile.type,
+                },
+            });
+
+            if (!r2Response.ok) {
+                throw new Error(`Upload file lên R2 thất bại: ${r2Response.statusText}`);
+            }
+
+            // 3.4: Lấy URL public (để lưu vào CSDL)
+            avatarUrlToSet = `${R2_PUBLIC_URL}/${r2Key}`;
+            console.log("Upload ảnh thành công, URL:", avatarUrlToSet);
+        }
+
+        // --- BƯỚC 4: TẠO PROFILE (RLS SẼ KIỂM TRA QUYỀN ADMIN) ---
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+                id: newUserId,
+                role_id: designerRoleId,
+                name: formData.name,
+                phone: formData.phone,
+                avatar_url: avatarUrlToSet, // Dùng link R2
+                status: 'active'
+            });
+
+        if (profileError) {
+            throw new Error(`Lỗi tạo Profile (RLS?): ${profileError.message}`);
+        }
+
+        // --- HOÀN TẤT ---
+        alert(`Tạo người dùng ${formData.role} mới thành công!`);
+        navigate('/admin_designers');
+
+    } catch (error: any) {
+        console.error("Lỗi khi tạo designer:", error);
+        alert(`Tạo designer thất bại: ${error.message}`);
+    } finally {
+        setLoading(false);
+    }
   };
 
+  // --- GIAO DIỆN (GIỮ NGUYÊN) ---
   return (
-    // Sử dụng style nhất quán với các trang khác
     <div className='Ad_DesignerNew p-6 md:p-10 bg-[#fcfcfc] min-h-screen'>
       <h1 className="text-2xl md:text-3xl font-semibold text-gray-700 mb-6">Add New Designer</h1>
-      {/* Chỉ báo loading nhỏ */}
       {loading && <div className="fixed top-4 right-4"><CircularProgress size={24} /></div>}
 
       <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-lg shadow-md space-y-6">
-
-        {/* --- Phần Ảnh --- */}
         <div className="flex flex-col items-center gap-4 border-b pb-6">
           <Avatar
-             src={previewUrl || undefined} // Hiển thị ảnh xem trước
-             sx={{ width: 120, height: 120, mb: 2, bgcolor: '#e0e0e0' }} // Thêm màu nền
-             variant="rounded" // Hoặc circular
+             src={previewUrl || undefined} 
+             sx={{ width: 120, height: 120, mb: 2, bgcolor: '#e0e0e0' }}
+             variant="rounded"
           >
-            {!previewUrl && <span className="text-gray-500">Photo</span>} {/* Chữ thay thế */}
+            {!previewUrl && <span className="text-gray-500">Photo</span>}
           </Avatar>
-           {/* Input file ẩn */}
            <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
-              accept="image/*" // Chỉ chấp nhận file ảnh
+              accept="image/*"
               style={{ display: 'none' }}
            />
-           {/* Nút chọn ảnh */}
            <Button
               variant="outlined"
               onClick={handleUploadButtonClick}
               disabled={loading}
-              size="small" // Giảm kích thước nút
+              size="small"
             >
                {selectedFile ? `Đổi ảnh: ${selectedFile.name.substring(0,20)}...` : 'CHOOSE IMAGE FROM COMPUTER'}
            </Button>
-           {/* Trường nhập URL ảnh */}
            <TextField
               label="Or Enter Image URL"
               name="img"
@@ -196,13 +210,10 @@ const Ad_DesignerNew = () => {
               fullWidth
               variant="outlined"
               size="small"
-              disabled={loading || !!selectedFile} // Vô hiệu hóa nếu đã chọn file
+              disabled={loading || !!selectedFile}
               helperText={selectedFile ? "Đang sử dụng file ảnh đã chọn ở trên" : "Nhập link trực tiếp đến ảnh"}
             />
         </div>
-        {/* ------------------- */}
-
-        {/* --- Các trường thông tin --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 pt-4">
            <TextField
               label="Full Name"
@@ -210,10 +221,10 @@ const Ad_DesignerNew = () => {
               value={formData.name}
               onChange={handleChange}
               fullWidth
-              required // Bắt buộc nhập
+              required
               variant="outlined"
               disabled={loading}
-              InputLabelProps={{ shrink: true }} // Luôn hiển thị label
+              InputLabelProps={{ shrink: true }}
             />
            <TextField
               label="Email Address"
@@ -222,11 +233,24 @@ const Ad_DesignerNew = () => {
               value={formData.email}
               onChange={handleChange}
               fullWidth
-              required // Bắt buộc nhập
+              required
               variant="outlined"
               disabled={loading}
               InputLabelProps={{ shrink: true }}
             />
+           <TextField
+              label="Mật khẩu"
+              name="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              fullWidth
+              required
+              variant="outlined"
+              disabled={loading}
+              InputLabelProps={{ shrink: true }}
+              helperText="Mật khẩu cho người dùng mới"
+           />
            <TextField
               label="Phone Number"
               name="phone"
@@ -237,48 +261,29 @@ const Ad_DesignerNew = () => {
               disabled={loading}
               InputLabelProps={{ shrink: true }}
             />
-           {/* Trường Role (vô hiệu hóa, mặc định là 'designer') */}
            <TextField
               label="Role"
               name="role"
               value={formData.role}
               fullWidth
-              disabled // Không cho sửa vai trò ở đây
-              variant="filled" // Dùng filled để thể hiện read-only
+              disabled 
+              variant="filled" 
               size="small"
               InputLabelProps={{ shrink: true }}
            />
-           {/* Thêm trường Password nếu cần */}
-           {/*
-           <TextField
-              label="Mật khẩu"
-              name="password"
-              type="password"
-              onChange={handleChange}
-              fullWidth
-              required
-              variant="outlined"
-              disabled={loading}
-              InputLabelProps={{ shrink: true }}
-           />
-           */}
         </div>
-        {/* ------------------------ */}
-
-        {/* Nút Submit */}
         <div className="flex justify-end pt-4">
             <Button
               type="submit"
               variant="contained"
               color="primary"
-              size="large" // Tăng kích thước nút
+              size="large"
               disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null} // Thêm icon loading
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
             >
               {loading ? 'Đang tạo...' : 'Tạo Designer'}
             </Button>
         </div>
-        {/* ------------- */}
       </form>
     </div>
   );
