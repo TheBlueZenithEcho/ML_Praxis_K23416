@@ -47,7 +47,7 @@ import AvatarProfile from './components/admin/AvatarProfile';
 import ProductProfile from './components/admin/ProductProfile';
 import InteriorProfile from './components/admin/InteriorProfile';
 import Ad_ProductNew from './components/admin/Ad_ProductNew';
-import Ad_DesignerNew from './components/admin/Ad_DesignerNew';
+
 
 // --- Designer Pages ---
 import ProfilePage from './pages/designer/Profile';
@@ -62,6 +62,10 @@ import InteriorApprovalProfile from './components/admin/InteriorApprovalProfile'
 import Ad_Quotation from './pages/admin/Ad_Quotation';
 import QuotationProfile from './components/admin/QuotationProfile';
 import DesignerLayout from './layouts/LayoutDesigner';
+
+// ⭐️⭐️⭐️ SỬA LỖI 404: THÊM DÒNG IMPORT NÀY ⭐️⭐️⭐️
+import Ad_DesignerNew from './components/admin/Ad_DesignerNew';
+// ⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️
 
 /*
  * ---------------------------------------
@@ -175,14 +179,16 @@ const router = createBrowserRouter([
       { path: "/admin_users", element: <Ad_Users /> },
       { path: "/admin_designers", element: <Ad_Designers /> },
       { path: "/admin_products", element: <Ad_Products /> },
-      { path: "/admin_designers/new", element: <Ad_DesignerNew /> },
+      
+      // ⭐️⭐️⭐️ SỬA LỖI 404: THÊM DÒNG PATH NÀY VÀO ⭐️⭐️⭐️
+      { path: "/admin_designer/new", element: <Ad_DesignerNew /> },
+      // ⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️
+      
       { path: "/admin_products/new", element: <Ad_ProductNew /> },
       { path: "/admin/:id", element: <AvatarProfile /> }, // Đây là profile của Admin
       
-      // ⭐️⭐️⭐️ SỬA LỖI XUNG ĐỘT TẠI ĐÂY ⭐️⭐️⭐️
-      // Đổi path "/designer/:id" thành "/desad/:id" như bạn muốn
+      // (Path xem profile designer của Admin)
       { path: "/desad/:id", element: <AvatarProfile /> },
-      // ⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️
 
       { path: "/users/:id", element: <AvatarProfile /> },
       { path: "/products/:id", element: <ProductProfile /> },
