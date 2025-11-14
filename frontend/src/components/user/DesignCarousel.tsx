@@ -64,7 +64,7 @@ const DesignCarousel: React.FC<DesignCarouselProps> = ({ designs, loading, error
     if (loading)
         return (
             <div className="h-[420px] flex items-center justify-center">
-                <p>Đang tải thiết kế...</p>
+                <p>Loading design…</p>
             </div>
         );
 
@@ -78,7 +78,7 @@ const DesignCarousel: React.FC<DesignCarouselProps> = ({ designs, loading, error
     if (designs.length === 0)
         return (
             <div className="h-[420px] flex items-center justify-center">
-                <p>Không tìm thấy thiết kế nào.</p>
+                <p>No designs found.</p>
             </div>
         );
 
@@ -125,17 +125,17 @@ const DesignCarousel: React.FC<DesignCarouselProps> = ({ designs, loading, error
             <button
                 type="button"
                 onClick={scrollLeft}
-                className="absolute top-1/2 -translate-y-1/2 start-5 z-10 size-9.5 bg-white flex items-center justify-center rounded-full shadow-md"
+                className="absolute top-1/2 -translate-y-1/2 left-5 z-20 w-10 h-10 bg-white flex items-center justify-center rounded-full shadow-m"
             >
-                <span className="bi bi-arrow-left size-5 cursor-pointer"></span>
+                <span className="bi bi-caret-left-fill text-xl text-black cursor-pointer"></span>
             </button>
 
             <button
                 type="button"
                 onClick={scrollRight}
-                className="absolute top-1/2 -translate-y-1/2 end-5 z-10 size-9.5 bg-white flex items-center justify-center rounded-full shadow-md"
+                className="absolute top-1/2 -translate-y-1/2 right-5 z-20 w-10 h-10 bg-white flex items-center justify-center rounded-full shadow-md"
             >
-                <span className="bi bi-arrow-right size-5 cursor-pointer"></span>
+                <span className="bi bi-caret-right-fill text-xl text-black cursor-pointer" ></span>
             </button>
         </div>
     );

@@ -5,7 +5,7 @@ import DesignTab from "./DesignTab";
 import { useAuth } from "../../context/AuthContext";
 
 interface CusHeaderProps {
-    customerId: number | undefined; // số hoặc undefined
+    customerId: string | undefined; // số hoặc undefined
 }
 
 interface User {
@@ -31,7 +31,7 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
     const [designCount, setDesignCount] = useState(0);
     const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
-    const { logout } = useAuth();
+    const { user, logout } = useAuth(); // ✅ Luôn ở đầu component
 
     const handleToggleDesignTab = () => setShowDesignTab(!showDesignTab);
     const toggleMenu = () => setOpen((prev) => !prev);
@@ -56,72 +56,47 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // Fetch user data
+    // Cập nhật avatar khi user thay đổi
     useEffect(() => {
-        if (customerId === undefined) {
+        if (!user) {
             setCurrentUserData(null);
             setLoading(false);
             return;
         }
 
-        const fetchUserData = async () => {
-            setLoading(true);
-            try {
-                const API_URL = "https://api.npoint.io/4a915d88732882680a44";
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const users: User[] = await response.json();
-                const user = users.find((u) => u.id === customerId);
-                if (user) {
-                    const profileLink = user.role === "admin" ? "/admin/profile" : "/customer/profile";
-                    setCurrentUserData({ img: user.img, profileLink });
-                } else {
-                    setCurrentUserData(null);
-                }
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-                setCurrentUserData(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUserData();
-    }, [customerId]);
+        setLoading(true);
+        setCurrentUserData({
+            img: user.img || "https://placehold.co/30x30/7C7C7C/white?text=AVT",
+            profileLink: `/customer/${user.id}/profile`,
+        });
+        setLoading(false);
+    }, [user]);
 
     // Load số lượng design từ localStorage và lắng nghe event update
     useEffect(() => {
-        if (!customerId) {
-            setDesignCount(0);
-            return;
-        }
+        if (!customerId) return;
 
         const key = `designTab_${customerId}`;
 
-        // Hàm cập nhật số lượng hiện tại
         const updateCount = () => {
             const saved: any[] = JSON.parse(localStorage.getItem(key) || "[]");
             setDesignCount(saved.length);
         };
 
-        // Load lần đầu
+        // Load lần đầu khi mount
         updateCount();
 
-        // Lắng nghe khi designTab thay đổi
+        // Lắng nghe event update
         window.addEventListener("designTabChange", updateCount);
-
-        // Lắng nghe event khi designs được gửi sang ConsultationPage
-        const handleSendDesignsToChat = () => setDesignCount(0);
-        window.addEventListener("sendDesignsToChat", handleSendDesignsToChat);
+        window.addEventListener("sendDesignsToChat", updateCount);
 
         return () => {
             window.removeEventListener("designTabChange", updateCount);
-            window.removeEventListener("sendDesignsToChat", handleSendDesignsToChat);
+            window.removeEventListener("sendDesignsToChat", updateCount);
         };
     }, [customerId]);
 
     const safeCustomerLink = customerId !== undefined ? `/customer/${customerId}` : "/";
-
     return (
         <>
             <header className="fixed top-0 left-0 w-full z-30 bg-white shadow">
@@ -202,8 +177,11 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                             </div>
 
                             {/* Chat */}
-                            <Link to="/chat-with-designers" title="">
-                                <i className="bi bi-wechat text-2xl hover:text-green-700 transition"></i>
+                            <Link
+                                to={`/customer/${customerId}/consultation`}
+                                title="Tư vấn với Designer"
+                            >
+                                <i className="bi bi-wechat text-2xl hover:text-green-700 transition cursor-pointer"></i>
                             </Link>
 
                             {/* Avatar */}

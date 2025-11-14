@@ -1,21 +1,23 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext"; // ✅ dùng context thay cho Zustand
+import { supabase } from "../../lib/supabaseClient";
+import { a } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 
 // 🧩 Định nghĩa kiểu dữ liệu của người dùng
 interface User {
-    id: number;
+    id: string;
     img: string;
     name: string;
-    role: "admin" | "designer" | "user";
+    role: "user";
     email: string;
     phone: string;
     createdAt: string;
 }
 
-// 🔗 API chứa danh sách user
-const API_URL = "https://api.npoint.io/4a915d88732882680a44";
+// mock API chứa danh sách user
+// const API_URL = "https://api.npoint.io/4a915d88732882680a44";
 
 const RegisterForm: React.FC = () => {
     const navigate = useNavigate();
@@ -31,16 +33,10 @@ const RegisterForm: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [userProfile, setUserProfile] = useState<User | null>(null);
 
-    const closeModal = () => {
-        setIsModalOpen(false);
-        setMessage("");
 
-        // Nếu đăng ký thành công thì chuyển hướng
-        if (isSuccess) {
-            navigate("/cus_homepage");
-        }
-    };
+    const DEFAULT_AVATAR_URL = "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=1600";
 
     // 🔹 Hàm xử lý đăng ký
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -56,37 +52,140 @@ const RegisterForm: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch(API_URL);
-            if (!response.ok) throw new Error("Không thể kết nối đến API.");
+            // Đảm bảo chỉ có thể tạo profile với role này
+            // const { data: roleData, error: roleError } = await supabase
+            //     .from('roles')
+            //     .select('id')
+            //     .eq('role_name', 'user')
+            //     .single();
 
-            const users: User[] = await response.json();
+            // if (roleError || !roleData) {
+            //     setMessage("Lỗi hệ thống: Không tìm thấy ID vai trò 'user'. Vui lòng liên hệ Admin.");
+            //     setIsSuccess(false);
+            //     setIsModalOpen(true);
+            //     return;
+            // }
+            // const customerRoleId = roleData.id;
 
-            const emailExists = users.some(
-                (u) => u.email.toLowerCase() === email.toLowerCase()
-            );
+            // --- Bước 1: Đăng ký người dùng mới bằng Supabase Auth ---
+            // const { data: authData, error: authError } = await supabase.auth.signUp({
+            //     email: email,
+            //     password: password,
+            //     options: {
+            //         data: { 
+            //             // Truyền Name vào raw_user_meta_data để trigger tạo profile sử dụng
+            //             name: name 
+            //         },
+            //     },
+            // });
 
-            if (emailExists) {
-                setMessage("Email này đã được đăng ký. Vui lòng dùng email khác.");
+            // if (authError) {
+            //     // Xử lý các lỗi phổ biến như: mật khẩu quá ngắn, người dùng đã tồn tại
+            //     const msg = authError.message.includes("Password should be at least 6 characters")
+            //         ? "Mật khẩu phải có ít nhất 6 ký tự."
+            //         : authError.message.includes("User already registered")
+            //         ? "Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác."
+            //         : authError.message; // Giữ nguyên lỗi khác
+
+            //     setMessage("Đăng ký thất bại: " + msg);
+            //     setIsSuccess(false);
+            //     setIsModalOpen(true);
+            //     return;
+            // }
+
+            // // Kiểm tra: Nếu email xác thực đang bật, Supabase sẽ không trả về session, 
+            // // người dùng cần kiểm tra email trước.
+            // if (!authData.session) {
+            //     setMessage(
+            //         "Đăng ký thành công! Vui lòng kiểm tra email của bạn để xác nhận tài khoản trước khi đăng nhập."
+            //     );
+            //     setIsSuccess(true); // Coi là thành công nhưng chưa đăng nhập
+            //     setIsModalOpen(true);
+            //     return;
+            // }
+            // BẠN CHỈ CẦN GỌI HÀM NÀY, KHÔNG GỌI .insert() HAY .update()
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    // Dữ liệu này sẽ được gửi đến trigger
+                    // thông qua 'NEW.raw_user_meta_data'
+                    data: {
+                        name: name, // Dữ liệu từ form
+                        avatar_url: DEFAULT_AVATAR_URL, // Dữ liệu từ form
+                        source:'public_signup'
+
+                        // QUAN TRỌNG:
+                        // Client KHÔNG NÊN tự gán role.
+                        // Việc gán role nên được làm ở server (trong trigger)
+                        // để đảm bảo bảo mật.
+                    }
+                }
+            });
+
+            if (authError) {
+                // Xử lý lỗi đăng ký (email tồn tại, mật khẩu yếu...)
+                console.error("Sign up error:", authError);
+                setMessage(authError.message);
                 setIsSuccess(false);
                 setIsModalOpen(true);
-            } else {
-                const newUser: User = {
-                    id: users.length + 1,
-                    name,
-                    email,
-                    phone: "",
-                    img: "/default-avatar.png",
-                    createdAt: new Date().toISOString(),
-                    role: "user",
-                };
+                return;
+            }
 
-                // ✅ Dùng context login
-                login(newUser);
-
-                setMessage(`Đăng ký thành công! Chào mừng ${name}.`);
+            if (authData.user) {
+                // Trigger SẼ tự động tạo profile.
+                // Client không cần làm gì thêm.
+                setMessage("Đăng ký thành công! Vui lòng kiểm tra email để xác thực.");
                 setIsSuccess(true);
                 setIsModalOpen(true);
             }
+
+            if (!authData.session) {
+                setMessage(
+                    "Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản trước khi đăng nhập."
+                );
+                setIsSuccess(true);
+                setIsModalOpen(true);
+                return;
+            }
+
+            if (authData.user && authData.session) {
+                const userId = authData.user.id;
+                console.log("User registered with ID:", userId);
+
+                // --- Bước 2: Đăng ký thành công & Session có sẵn (Auto sign-in) ---
+                // Lấy hồ sơ (profile) đầy đủ bằng RPC, giống như trong Login
+                const { data: profileArray, error: rpcError } = await supabase.rpc('get_my_profile');
+
+                if (rpcError) {
+                    setMessage("Đăng ký thành công, nhưng không thể lấy hồ sơ người dùng: " + rpcError.message);
+                    setIsSuccess(true);
+                    setIsModalOpen(true);
+                    return;
+                }
+                const userProfile = profileArray ? profileArray[0] as User : null;
+                // if(userProfile)userProfile.phone= userProfile.phone?? "563 632 325";
+                // console.log("Hồ sơ người dùng sau đăng ký, them avatar, phone:", userProfile);
+
+                if (!userProfile) {
+                    setMessage("Đăng ký thành công, nhưng không tìm thấy hồ sơ người dùng. Vui lòng liên hệ hỗ trợ.");
+                    setIsSuccess(true);
+                    setIsModalOpen(true);
+                    return;
+                }
+
+               
+            // --- Bước 3: Lưu vào Context và Chuyển hướng ---
+            setUserProfile(userProfile);
+            login(userProfile);
+
+            setMessage(`Đăng ký thành công! Chào mừng ${userProfile.name}.`);
+            setIsSuccess(true);
+            setIsModalOpen(true);
+
+        }
+            
+
         } catch (error) {
             console.error("Lỗi đăng ký:", error);
             setMessage("Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại sau.");
@@ -96,7 +195,15 @@ const RegisterForm: React.FC = () => {
             setIsLoading(false);
         }
     };
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setMessage("");
 
+        // Nếu đăng ký thành công thì chuyển hướng
+        if (isSuccess) {
+            navigate(`/customer/${userProfile.id}`);
+        }
+    };
     // 🔹 Modal thông báo kết quả đăng ký
     const StatusModal: React.FC = () => {
         const iconClass = isSuccess

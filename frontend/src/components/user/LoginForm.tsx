@@ -7,7 +7,7 @@ import { supabase } from "../../lib/supabaseClient";
 // Định nghĩa Interface (Typescript)
 interface User {
     id: string; // Thêm ID vào interface
-    img: string;
+    avatar_url: string | null;
     name: string;
     role: string;
     email: string;
@@ -145,7 +145,10 @@ const LoginForm = () => {
 
             // --- Bước 3: Lưu vào Context và Chuyển hướng ---
             // Dùng userProfile (đã bao gồm 'role') để gọi hàm login từ Context
-            login(userProfile); 
+            login({
+                ...userProfile,
+                img: userProfile.avatar_url || "https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg"
+            }); 
 
             if (userProfile.role === "admin") {
                 navigate("/admin_home");

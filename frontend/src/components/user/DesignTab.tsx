@@ -130,33 +130,30 @@ const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
                         Clear
                     </button>
                     <button
-    onClick={() => {
-        if (!user) return;
+                        onClick={() => {
+                            if (!user) return;
 
-        const key = `designTab_${user.id}`;
-        const savedDesigns: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
-        if (savedDesigns.length === 0) return;
+                            const key = `designTab_${user.id}`;
+                            const savedDesigns: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
+                            if (savedDesigns.length === 0) return;
 
-        // Lưu tạm designs
-        localStorage.setItem(`pendingDesigns_${user.id}`, JSON.stringify(savedDesigns));
+                            // Lưu tạm designs
+                            localStorage.setItem(`pendingDesigns_${user.id}`, JSON.stringify(savedDesigns));
 
-        // ✅ Thông báo header trước khi xóa localStorage
-        window.dispatchEvent(new Event("sendDesignsToChat"));
+                            // ✅ Thông báo header trước khi xóa localStorage
+                            window.dispatchEvent(new Event("sendDesignsToChat"));
 
-        // Xóa designTab
-        localStorage.removeItem(key);
-        setItems([]);
 
-        // Đóng tab
-        onClose();
+                            // Đóng tab
+                            onClose();
 
-        // Chuyển sang ConsultationPage
-        navigate(`/customer/${user.id}/consultation`);
-    }}
-    className="bg-green-600 text-white py-2 rounded"
->
-    Consultation Page
-</button>
+                            // Chuyển sang ConsultationPage
+                            navigate(`/customer/${user.id}/consultation`);
+                        }}
+                        className="bg-green-600 text-white py-2 rounded"
+                    >
+                        Consultation Page
+                    </button>
                 </div>
             </div>
         </>

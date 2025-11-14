@@ -34,10 +34,18 @@ const ConsultationPage: React.FC = () => {
     const { user } = useAuth();
     const [messages, setMessages] = useState<Message[]>([]);
     const [leads, setLeads] = useState<CustomerLead[]>([]);
+
+    // --- Load từ localStorage + xử lý pending designs ---
     useEffect(() => {
         if (!user?.id) return;
 
-        // 1️⃣ Kiểm tra xem có pending designs từ DesignTab không
+        // 1️⃣ Load leads + messages từ localStorage
+        const savedLeads: CustomerLead[] = JSON.parse(localStorage.getItem(`leads_${user.id}`) || "[]");
+        const savedMessages: Message[] = JSON.parse(localStorage.getItem(`messages_${user.id}`) || "[]");
+        setLeads(savedLeads);
+        setMessages(savedMessages);
+
+        // 2️⃣ Kiểm tra pending designs từ DesignTab
         const pendingKey = `pendingDesigns_${user.id}`;
         const pendingDesigns: Design[] = JSON.parse(localStorage.getItem(pendingKey) || '[]');
 
@@ -57,7 +65,12 @@ const ConsultationPage: React.FC = () => {
                 lastContactAt: new Date().toISOString(),
                 totalMessages: 0,
             };
-            setLeads(prev => [newLead, ...prev]);
+
+            setLeads(prev => {
+                const updated = [newLead, ...prev];
+                localStorage.setItem(`leads_${user.id}`, JSON.stringify(updated));
+                return updated;
+            });
 
             const designMessages: Message[] = pendingDesigns.map((design, idx) => ({
                 id: Date.now().toString() + idx,
@@ -89,9 +102,13 @@ const ConsultationPage: React.FC = () => {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
             }));
-            setMessages(prev => [...prev, ...designMessages]);
 
-            // 2️⃣ Xóa pending sau khi xử lý
+            setMessages(prev => {
+                const updatedMessages = [...prev, ...designMessages];
+                localStorage.setItem(`messages_${user.id}`, JSON.stringify(updatedMessages));
+                return updatedMessages;
+            });
+
             localStorage.removeItem(pendingKey);
         }
     }, [user]);
@@ -132,7 +149,11 @@ const ConsultationPage: React.FC = () => {
                 updatedAt: new Date().toISOString(),
             };
 
-            setMessages(prev => [...prev, newMessage]);
+            setMessages(prev => {
+                const updated = [...prev, newMessage];
+                localStorage.setItem(`messages_${user.id}`, JSON.stringify(updated));
+                return updated;
+            });
         },
         [user]
     );
@@ -145,7 +166,6 @@ const ConsultationPage: React.FC = () => {
             if (!savedDesigns || savedDesigns.length === 0) return;
             if (!user?.id) return;
 
-            // Gộp theo loại phòng
             const grouped: Record<string, Design[]> = {};
             savedDesigns.forEach(d => {
                 const type = d["type room"] || "Unknown Room";
@@ -153,7 +173,6 @@ const ConsultationPage: React.FC = () => {
                 grouped[type].push(d);
             });
 
-            // Tạo lead mới (không gộp)
             const newLead: CustomerLead = {
                 id: 'lead-' + Date.now(),
                 customerName: user.name,
@@ -163,9 +182,12 @@ const ConsultationPage: React.FC = () => {
                 totalMessages: 0,
             };
 
-            setLeads(prev => [newLead, ...prev]);
+            setLeads(prev => {
+                const updatedLeads = [newLead, ...prev];
+                localStorage.setItem(`leads_${user.id}`, JSON.stringify(updatedLeads));
+                return updatedLeads;
+            });
 
-            // Tạo message thiết kế
             const designMessages: Message[] = savedDesigns.map((design, idx) => ({
                 id: Date.now().toString() + idx,
                 chatId: 'consultation',
@@ -197,7 +219,11 @@ const ConsultationPage: React.FC = () => {
                 updatedAt: new Date().toISOString(),
             }));
 
-            setMessages(prev => [...prev, ...designMessages]);
+            setMessages(prev => {
+                const updatedMessages = [...prev, ...designMessages];
+                localStorage.setItem(`messages_${user.id}`, JSON.stringify(updatedMessages));
+                return updatedMessages;
+            });
         };
 
         window.addEventListener('sendDesignsToChat', handleDesignTabChange);
