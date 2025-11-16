@@ -8,7 +8,7 @@ import { a } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 // 🧩 Định nghĩa kiểu dữ liệu của người dùng
 interface User {
     id: string;
-    img: string;
+    avatar_url: string;
     name: string;
     role: "user";
     email: string;
@@ -16,24 +16,23 @@ interface User {
     createdAt: string;
 }
 
-// mock API chứa danh sách user
-// const API_URL = "https://api.npoint.io/4a915d88732882680a44";
 
 const RegisterForm: React.FC = () => {
     const navigate = useNavigate();
-    const { login } = useAuth(); // ✅ lấy login từ context
+    const { login } = useAuth(); 
 
-    // 📌 State lưu dữ liệu nhập
+    // State lưu dữ liệu nhập
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [userProfile, setUserProfile] = useState<User | null>(null);
 
-    // 📌 State cho modal
+    // State cho modal
     const [message, setMessage] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [userProfile, setUserProfile] = useState<User | null>(null);
+    
 
 
     const DEFAULT_AVATAR_URL = "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=1600";

@@ -10,7 +10,7 @@ interface CusHeaderProps {
 
 interface User {
     id: number;
-    img: string;
+    avatar_url: string;
     role: string;
     name: string;
     email: string;
@@ -19,7 +19,7 @@ interface User {
 }
 
 interface HeaderUserData {
-    img: string;
+    avatar_url: string;
     profileLink: string;
 }
 
@@ -66,10 +66,12 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
 
         setLoading(true);
         setCurrentUserData({
-            img: user.img || "https://placehold.co/30x30/7C7C7C/white?text=AVT",
+            avatar_url:  user.img || user.avatar_url ,
             profileLink: `/customer/${user.id}/profile`,
         });
         setLoading(false);
+        console.log("user:", user);
+        console.log("currentUserData:", currentUserData);
     }, [user]);
 
     // Load số lượng design từ localStorage và lắng nghe event update
@@ -111,26 +113,26 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                         <div className="hidden md:block">
                             <ul className="flex items-center text-gray-950 gap-12">
                                 <li>
-                                    <Link to={safeCustomerLink} className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition">
+                                    <Link to={safeCustomerLink} className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition text-center">
                                         Home
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link to={safeCustomerLink} className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition">
-                                        Designer
+                                    <Link to={safeCustomerLink} className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition text-center">
+                                        About
                                     </Link>
                                 </li>
                                 <li className="relative group">
-                                    <button className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition">
+                                    <button className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition text-center">
                                         <span className="flex items-center justify-center">
                                             Type Rooms <i className="bi bi-caret-down-fill text-xs ml-1"></i>
                                         </span>
                                     </button>
-                                    <ul className="top-[100%] absolute left-0 hidden group-hover:block bg-white text-[#143E08] rounded-lg w-40 z-20 opacity-0 group-hover:opacity-100 shadow-md transition">
+                                    <ul className="top-[110%] absolute left-0 hidden group-hover:block bg-white text-[#143E08] rounded-lg w-40 z-20 opacity-0 group-hover:opacity-100 shadow-md transition pt-2">
                                         <li>
                                             <Link
                                                 to={customerId ? `/customer/${customerId}/bedroom` : "/bedroom"}
-                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold "
                                             >
                                                 Bedroom
                                             </Link>
@@ -138,7 +140,7 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                                         <li>
                                             <Link
                                                 to={customerId ? `/customer/${customerId}/livingroom` : "/livingroom"}
-                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold "
                                             >
                                                 Living Room
                                             </Link>
@@ -146,7 +148,7 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                                         <li>
                                             <Link
                                                 to={customerId ? `/customer/${customerId}/kitchen` : "/kitchen"}
-                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold "
                                             >
                                                 Kitchen
                                             </Link>
@@ -156,8 +158,7 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                                 <li>
                                     <Link
                                         to={customerId ? `/customer/${customerId}/contact` : "/contact"}
-                                        className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition"
-                                    >
+                                        className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition text-center">
                                         Contact
                                     </Link>
                                 </li>
@@ -170,7 +171,7 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                             <div className="relative">
                                 <i className="bi bi-house-add-fill text-2xl hover:text-green-700 transition cursor-pointer" onClick={handleToggleDesignTab}></i>
                                 {designCount > 0 && (
-                                    <span className="absolute top-2/3 right-1/2 bg-[#1A4B0C] text-[#FDFBCE] text-sm w-4 h-4 rounded-full flex justify-center items-center">
+                                    <span className="absolute top-1/2 left-1/2 bg-yellow-200 text-[#1A4B0C] text-[10px] font-inter font-semibold w-4 h-4 rounded-full flex justify-center items-center">
                                         {designCount}
                                     </span>
                                 )}
@@ -191,7 +192,7 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                                 ) : currentUserData ? (
                                     <img
                                         className="w-[30px] h-[30px] rounded-full object-cover border-2 border-green-500 shadow-md hover:opacity-90 cursor-pointer transition"
-                                        src={currentUserData.img}
+                                        src={currentUserData.avatar_url}
                                         alt="User profile"
                                         onClick={toggleLogoutMenu}
                                         onError={(e) => {

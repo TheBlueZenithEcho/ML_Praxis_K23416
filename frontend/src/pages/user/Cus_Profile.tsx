@@ -5,7 +5,7 @@ import React from "react";
 
 const Cus_Profile = () => {
     return (
-        <div>
+        <div className="min-h-screen ">
             <Cus_Profile_Form />
         </div>
     );

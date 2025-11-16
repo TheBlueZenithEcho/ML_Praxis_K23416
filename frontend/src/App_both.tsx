@@ -36,6 +36,7 @@ import About from './pages/user/About';
 // --- Customer Pages (Người dùng đã đăng nhập) ---
 import Cus_HomePage from "./pages/user/Cus_HomePage";
 import ConsultationPage from './pages/user/ConsultationPage';
+import Cus_Profile from './pages/user/Cus_Profile';
 
 // --- Admin Pages ---
 import Ad_Home from './pages/admin/Ad_Home';
@@ -154,7 +155,8 @@ const router = createBrowserRouter([
       { path: "livingRoom", element: <LivingRoom /> },
       { path: "bedRoom", element: <BedRoom /> },
       { path: "kitchen", element: <Kitchen /> },
-      { path: "consultation", element: (<ConsultationPage />), }
+      { path: "consultation", element: (<ConsultationPage />)}, 
+      { path: "profile", element: <Cus_Profile /> },
 
     ],
   },

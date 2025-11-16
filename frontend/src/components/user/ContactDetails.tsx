@@ -11,7 +11,7 @@ const contactItems = [
 const ContactDetails: FC = () => {
     return (
         <div className="lg:w-1/2 pt-10">
-            <p className="text-gray-400 mb-8">
+            <p className="text-gray-500 mb-8">
                 In tempus nisl turpis, at ultricies dui eleifend a. Quisque et quam vel
                 ipsum tincidunt ullamcorper id purus eu, rhoncus consequat velit.
             </p>
@@ -19,17 +19,30 @@ const ContactDetails: FC = () => {
             {/* Contact Details Grid */}
             <div className="grid grid-cols-2 gap-6 mb-8">
                 {contactItems.map((item, index) => (
-                    <div key={index} className="p-4 bg-gray-800 rounded-lg text-center">
-                        <i className={`${item.icon} text-2xl text-white mb-2 block`}></i>
-                        <h4 className="font-semibold">{item.title}</h4>
-                        <p className="text-sm text-gray-400">{item.detail}</p>
+                    <div
+                        key={index}
+                        className="
+                            p-6 rounded-2xl text-center
+                            bg-[#e8ecf1]
+                            shadow-[10px_10px_20px_#c9ccd1,-10px_-10px_20px_#ffffff]
+                        "
+                    >
+                        <i className={`${item.icon} text-2xl text-gray-600 mb-3 block`}></i>
+                        <h4 className="font-semibold text-gray-700">{item.title}</h4>
+                        <p className="text-sm text-gray-500">{item.detail}</p>
                     </div>
                 ))}
             </div>
 
             {/* Map Embed Placeholder */}
-            <div className="w-full h-80 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 italic">
-                {/* Thay thế bằng iframe Google Maps */}
+            <div
+                className="
+                    w-full h-80 rounded-2xl
+                    bg-[#e8ecf1]
+                    shadow-[10px_10px_20px_#c9ccd1,-10px_-10px_20px_#ffffff]
+                    flex items-center justify-center text-gray-500 italic
+                "
+            >
                 [Vị trí nhúng Google Maps]
             </div>
         </div>

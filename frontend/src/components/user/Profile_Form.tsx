@@ -1,275 +1,233 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate, Navigate } from "react-router-dom";
-import {
-    TextField,
-    Button,
-    Avatar,
-    CircularProgress,
-    InputAdornment,
-} from "@mui/material";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabaseClient';
+import React, { useState } from 'react';
 
-// --- API giả lập ---
-const MOCK_API_URL = "https://api.npoint.io/4a915d88732882680a44";
+// Dữ liệu giả lập để hiển thị form
 
-// --- Kiểu dữ liệu ---
-type Customer = {
-    id: number;
-    name: string;
-    email: string;
-    phone: string;
-    img: string;
-    createdAt: string;
-    role: "user" | "designer" | "admin";
-};
+const inputStyle = `
+    w-full p-3 rounded-xl border-none 
+    bg-gray-100 
+    shadow-inner shadow-gray-300 
+    focus:outline-none focus:ring-2 focus:ring-[#082503] focus:shadow-md 
+    placeholder-gray-500 transition-all duration-300
+`;
 
-const Cus_Profile_Form: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-    const navigate = useNavigate();
-    const { user: currentUser } = useAuth();
+// --- Component Chính ---
+const UserProfileForm = () => {
 
-    const [customer, setCustomer] = useState<Customer | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+        // lấy user từ AuthContext
+        const { user, setUser, logout } = useAuth();
 
-    // --- Bảo vệ route ---
-    if (currentUser && Number(currentUser.id) !== Number(id)) {
-        return <Navigate to={`/customer/${currentUser.id}/profile`} replace />;
-    }
+        // Nếu chưa login → không có user
+        if (!user) return <p className="text-center mt-10">Loading user...</p>;
 
-    // --- Lấy thông tin khách hàng ---
-    useEffect(() => {
-        const fetchCustomer = async () => {
-            try {
-                setLoading(true);
-                if (!id) throw new Error("Missing ID");
-                const res = await fetch(MOCK_API_URL);
-                if (!res.ok) throw new Error("Cannot load user list");
-                const list: Customer[] = await res.json();
-                const found = list.find((u) => Number(u.id) === Number(id));
-                if (!found) throw new Error(`Customer not found (ID: ${id})`);
-                setCustomer(found);
-                setPreviewUrl(found.img);
-            } catch (err: any) {
-                console.error("Fetch error:", err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
+        // Tạo state để sửa form
+        const [name, setName] = useState(user.name);
+        const [phone, setPhone] = useState(user.phone || "");
+        const [avatar, setAvatar] = useState(user.img);
+
+        // --- HÀM UPDATE USER ---
+        const handleSave = async (e: any) => {
+            e.preventDefault();
+
+            // CÂU LỆNH CƠ BẢN — dễ cho người mới học
+            const { error } = await supabase
+                .from("users")                 // tbl users
+                .update({
+                    name: name,               // giá trị muốn sửa
+                    phone: phone,
+                    avatar_url: avatar
+                })
+                .eq("id", user.id);           // điều kiện WHERE id = user.id
+
+            if (error) {
+                alert("Update failed: " + error.message);
+                return;
             }
+
+            // cập nhật lại context
+            setUser({
+                ...user,
+                name,
+                phone,
+                avatar_url: avatar
+            });
+
+            alert("Profile updated successfully!");
         };
-        fetchCustomer();
-    }, [id]);
 
-    // --- Xử lý thay đổi input ---
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (customer) setCustomer({ ...customer, [e.target.name]: e.target.value });
-    };
+        // --- HÀM DELETE USER ---
+        const handleDeleteUser = async () => {
+            if (!confirm("Are you sure you want to delete this user?")) return;
 
-    // --- Xử lý chọn file ảnh ---
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setSelectedFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => setPreviewUrl(reader.result as string);
-            reader.readAsDataURL(file);
-        }
-    };
+            const { error } = await supabase
+                .from("profiles")
+                .delete()
+                .eq("id", user.id);
 
-    const handleUploadClick = () => fileInputRef.current?.click();
+            if (error) {
+                alert("Delete failed: " + error.message);
+                return;
+            }
 
-    // --- Giả lập upload file ---
-    const handleUploadConfirm = async () => {
-        if (!selectedFile) {
-            alert("Please select an image first.");
-            return;
-        }
-        alert("Mock upload: This is a simulation (no real API).");
-        console.log("Uploading file:", selectedFile.name);
-        setLoading(true);
-        await new Promise((r) => setTimeout(r, 2000));
-        setLoading(false);
-        alert("Upload successful!");
-    };
+            logout();
+            alert("User deleted!");
+        };
 
-    // --- Xóa ảnh ---
-    const handleDeletePhoto = () => {
-        if (!customer) return;
-        if (window.confirm("Remove profile photo?")) {
-            setPreviewUrl(null);
-            setSelectedFile(null);
-            setCustomer({ ...customer, img: "" });
-            alert("Photo removed (mock).");
-        }
-    };
+        // --- UPLOAD ẢNH (simple version) ---
+        const handleUploadPhoto = async (e: any) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    // --- Lưu thay đổi ---
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!customer) return;
-        setLoading(true);
-        await new Promise((r) => setTimeout(r, 1500));
-        alert("Changes saved (mock API).");
-        setLoading(false);
-    };
+            // upload file vào Supabase Storage
+            const { data, error } = await supabase.storage
+                .from("avatars")
+                .upload(`user_${user.id}.png`, file, { upsert: true });
 
-    // --- Render các trạng thái ---
-    if (loading && !customer)
-        return (
-            <div className="flex justify-center items-center min-h-[70vh]">
-                <CircularProgress />
-            </div>
-        );
-    if (error)
-        return (
-            <div className="p-8 text-center text-red-600 font-medium">{error}</div>
-        );
-    if (!customer) return null;
+            if (error) {
+                alert("Upload failed");
+                return;
+            }
 
-    // --- UI ---
+            // lấy link công khai
+            const { data: urlData } = supabase.storage
+                .from("avatars")
+                .getPublicUrl(data.path);
+
+            setAvatar(urlData.publicUrl);
+        };
+
     return (
-        <div className="max-w-3xl mx-auto p-6 md:p-10 mt-16 bg-white rounded-xl shadow-md">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row items-center gap-6 border-b pb-6 mb-6">
-                <Avatar
-                    src={previewUrl || undefined}
-                    sx={{ width: 100, height: 100 }}
-                />
-                <div className="text-center md:text-left">
-                    <h2 className="text-2xl font-semibold text-gray-800">
-                        {customer.name}
-                    </h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Joined: {new Date(customer.createdAt).toLocaleDateString()}
-                    </p>
+        // 1. Thay nền Form thành màu xám nhạt (bg-gray-100) để nổi bật hiệu ứng Neumorphism
+        <div className="max-w-4xl mx-auto my-16 p-8 lg:p-12 bg-gray-100 rounded-2xl shadow-xl">
+
+            {/* Tiêu đề Profile */}
+            <div className="border-b border-gray-300 pb-6 mb-8">
+                <h2 className="text-3xl font-serif text-[#082503] font-bold">
+                    UPDATE 
+                </h2>
+                <p className="text-gray-600 mt-1 font-inter">Manage your personal information and account settings</p>
+            </div>
+
+            {/* Avatar và Thông tin cơ bản (Áp dụng shadow nổi nhẹ) */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-10 p-6 bg-gray-100 rounded-xl shadow-lg">
+                <div className="flex items-center gap-6">
+                    {/* Avatar */}
+                    <img
+                        src={avatar}
+                        alt="User Avatar"
+                        className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
+                    />
+
+                    <div className="flex flex-col">
+                        <p className="text-xl font-semibold text-[#082503]">{name}</p>
+                    </div>
                 </div>
 
-                {/* Buttons upload / delete */}
-                <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0">
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={handleUploadClick}
-                        disabled={loading}
+                {/* Buttons Upload / Delete Photo (Giữ style hiện đại, dễ nhận biết) */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                        type="button"
+                        onClick={handleUploadPhoto}
+                        className="px-4 py-2 bg-[#082503] text-[#FDFBCE] rounded-xl font-medium hover:bg-opacity-90 transition shadow-md text-sm"
                     >
-                        {selectedFile ? "Change Photo" : "Upload Photo"}
-                    </Button>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        style={{ display: "none" }}
-                    />
-                    <Button
-                        variant="outlined"
-                        color="error"
-                        onClick={handleDeletePhoto}
-                        disabled={loading}
+                        UPLOAD NEW PHOTO
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setAvatar("")}
+                        className="px-4 py-2 border border-red-500 text-red-500 rounded-xl font-medium hover:bg-red-50 transition shadow-sm text-sm"
                     >
-                        Delete Photo
-                    </Button>
+                        DELETE PHOTO
+                    </button>
                 </div>
             </div>
 
-            {/* Hiển thị nút xác nhận upload */}
-            {selectedFile && (
-                <div className="mb-6 flex justify-center md:justify-start">
-                    <Button
-                        variant="contained"
-                        color="success"
-                        onClick={handleUploadConfirm}
-                        disabled={loading}
-                        size="small"
-                    >
-                        Confirm Upload: {selectedFile.name}
-                    </Button>
-                </div>
-            )}
+            {/* Form Chi tiết */}
+            <form onSubmit={handleSave} className="space-y-8">
 
-            {/* Form thông tin */}
-            <form onSubmit={handleSave} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <TextField
-                        label="Full Name"
-                        name="name"
-                        value={customer.name}
-                        onChange={handleChange}
-                        fullWidth
-                        required
-                        variant="outlined"
-                        disabled={loading}
-                    />
-                    <TextField
-                        label="Customer ID"
-                        value={customer.id}
-                        fullWidth
-                        variant="outlined"
-                        disabled
-                    />
+                {/* Hàng 1: Tên & ID */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Input Full Name */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                        <div className='relative flex items-center'>
+                            <i className="bi bi-person absolute left-4 text-gray-500 text-lg"></i>
+                            <input
+                                type="text"
+                                value={name}
+                                className={`pl-10 pr-3 py-3 ${inputStyle} cursor-not-allowed shadow-inner`}
+                                onChange={(e) => setName(e.target.value)}
+                            />
+                        </div>
+                        
+                    </div>
+                    {/* Input User ID (Disabled) */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">User ID</label>
+                        <div className="relative flex items-center">
+                            <i className="bi bi-fingerprint absolute left-4 text-gray-500 text-lg"></i>
+                            <input
+                                type="text"
+                                value={user.id}
+                                className={`pl-10 pr-3 py-3 ${inputStyle} cursor-not-allowed bg-gray-200 shadow-inner`}
+                                disabled
+                            />
+                        </div>
+                        
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <TextField
-                        label="Email"
-                        name="email"
-                        type="email"
-                        value={customer.email}
-                        fullWidth
-                        variant="outlined"
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <EmailIcon color="action" />
-                                </InputAdornment>
-                            ),
-                        }}
-                        disabled
-                    />
-                    <TextField
-                        label="Phone"
-                        name="phone"
-                        value={customer.phone}
-                        onChange={handleChange}
-                        fullWidth
-                        variant="outlined"
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <PhoneIcon color="action" />
-                                </InputAdornment>
-                            ),
-                        }}
-                        disabled={loading}
-                    />
+                {/* Hàng 2: Email & Phone */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Input Email (Disabled) */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                        <div className="relative flex items-center">
+                            <i className="bi bi-envelope absolute left-4 text-gray-500 text-lg"></i>
+                            <input
+                                type="email"
+                                value={user.email}
+                                className={`pl-10 pr-3 py-3 ${inputStyle} cursor-not-allowed bg-gray-200 shadow-inner`}
+                                disabled
+                            />
+                        </div>
+                    </div>
+                    {/* Input Phone */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                        <div className="relative flex items-center">
+                            <i className="bi bi-telephone absolute left-4 text-gray-500 text-lg"></i>
+                            <input
+                                type="tel"
+                                value={phone}
+                                className={`pl-10 pr-3 py-3 ${inputStyle} shadow-inner`}
+                                onChange={(e) => setPhone(e.target.value)}
+                            />
+                        </div>
+                    </div>
                 </div>
 
-                <div className="flex justify-end gap-4 pt-4">
-                    <Button
-                        variant="contained"
-                        color="primary"
+                {/* Buttons Lưu và Xóa/Hủy (Giữ style hiện đại) */}
+                <div className="flex justify-end gap-4 pt-6 border-t border-gray-300 mt-8">
+                    <button
                         type="submit"
-                        disabled={loading}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-xl font-semibold shadow-md hover:bg-blue-700 transition"
                     >
-                        {loading ? "Saving..." : "Save Changes"}
-                    </Button>
-                    <Button
-                        variant="outlined"
-                        onClick={() => navigate(`/customer/${id}`)}
-                        disabled={loading}
+                        SAVE CHANGES
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleDeleteUser}
+                        className="px-6 py-2 border border-red-500 text-red-500 rounded-xl font-medium hover:bg-red-50 transition"
                     >
-                        Back
-                    </Button>
+                        DELETE USER
+                    </button>
                 </div>
             </form>
         </div>
     );
 };
 
-export default Cus_Profile_Form;
+export default UserProfileForm;

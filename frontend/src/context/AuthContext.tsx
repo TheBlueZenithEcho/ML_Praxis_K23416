@@ -12,7 +12,7 @@ interface User {
     role: string;
     name: string;
     email: string;
-    img: string;
+    avatar_url: string;
 }
 
 interface AuthContextType {

@@ -7,7 +7,7 @@ import { supabase } from "../../lib/supabaseClient";
 // Định nghĩa Interface (Typescript)
 interface User {
     id: string; // Thêm ID vào interface
-    avatar_url: string | null;
+    avatar_url: string;
     name: string;
     role: string;
     email: string;
@@ -15,7 +15,6 @@ interface User {
     createdAt: string;
 }
 
-// const API_URL = "https://api.npoint.io/4a915d88732882680a44";
 
 const LoginForm = () => {
     // State (Trạng thái) để lưu trữ dữ liệu nhập từ form
@@ -147,7 +146,7 @@ const LoginForm = () => {
             // Dùng userProfile (đã bao gồm 'role') để gọi hàm login từ Context
             login({
                 ...userProfile,
-                img: userProfile.avatar_url || "https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg"
+                avatar_url: userProfile.avatar_url || "https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg"
             }); 
 
             if (userProfile.role === "admin") {

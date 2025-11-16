@@ -2,12 +2,17 @@ import React, { FC } from 'react';
 
 const Footer: FC = () => {
     return (
-        <footer className="bg-[#082503] py-12 mt-[100px]">
+        <footer className="relative bg-[#082503] pt-8 pb-0 mt-[100px] overflow-visible">
+            {/* Ảnh ghế responsive */}
+            <img
+                src="/img/decor/footer.png"
+                alt="Decor Chair"
+                className=" hidden md:block absolute -top-[140px] pointer-events-none -right-[7px] md:w-90 " />
+
             <div className="container mx-auto px-4 border-b text-[#FDFBCE] pb-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     {/* Footer Logo/About */}
                     <div>
-                        {/* Logo Placeholder */}
                         <div className="h-6 w-24 bg-gray-300 mb-4 rounded"></div>
                         <p className="text-[082503] text-sm mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eli.</p>
                         <div className="flex space-x-2">
@@ -39,10 +44,11 @@ const Footer: FC = () => {
                 </div>
             </div>
 
-            <div className="text-center pt-4 font-inter">
+            <div className="text-center pt-4 pb-4 font-inter">
                 <p className="text-xs text-[#ffffff] ">Copyright © 2023 Prasix | Powered by Prasix</p>
             </div>
         </footer>
+
     );
 };
 
