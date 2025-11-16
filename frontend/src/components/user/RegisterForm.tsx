@@ -105,11 +105,12 @@ const RegisterForm: React.FC = () => {
 
         // ✅ SỬA LOGIC CHUYỂN HƯỚNG
         if (isSuccess) {
-            // Sau khi đăng ký, luôn chuyển người dùng đến trang Đăng nhập.
+            // Sau khi đăng ký, nen chuyển người dùng đến trang Đăng nhập.
             // 1. Nếu cần xác thực email, họ sẽ phải đăng nhập sau.
             // 2. Nếu auto-login, họ sẽ được tự động chuyển hướng
             //    từ trang SignIn đến dashboard bởi Route Guards.
-            navigate(`/SignIn`);
+            // navigate(`/SignIn`);
+            navigate(`/`);// Chuyển đến trang gốc để Route Redirector xử lý
         }
     };
 
@@ -121,7 +122,7 @@ const RegisterForm: React.FC = () => {
             ? "bi bi-check-circle-fill text-green-600"
             : "bi bi-x-circle-fill text-red-600";
         const title = isSuccess ? "Registration Successful" : "Registration Failed";
-        const buttonText = isSuccess ? "Go to Sign In" : "Try Again"; // Sửa text
+        const buttonText = isSuccess ? "Go to Home Page" : "Try Again"; // Sửa text
         const colorClass = isSuccess
             ? "bg-green-500 hover:bg-green-600"
             : "bg-red-500 hover:bg-red-600";
