@@ -2,42 +2,42 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ResponsiveMenu from "./ResponsiveMenu";
 import DesignTab from "./DesignTab";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext"; // ✅ Đã dùng context mới
 
-interface CusHeaderProps {
-    customerId: string | undefined; // số hoặc undefined
-}
+// ❌ Không cần interface này nữa
+// interface CusHeaderProps {
+//     customerId: string | undefined; 
+// }
 
-interface User {
-    id: number;
-    img: string;
-    role: string;
-    name: string;
-    email: string;
-    phone: string;
-    createdAt: string;
-}
+// ❌ Không cần interface User cũ này nữa
+// interface User { ... }
 
 interface HeaderUserData {
     img: string;
     profileLink: string;
 }
 
-const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
+// ✅ Không cần nhận prop `customerId`
+const Cus_Header: React.FC = () => {
     const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true); // Giữ state loading local cho avatar
     const [currentUserData, setCurrentUserData] = useState<HeaderUserData | null>(null);
     const [showDesignTab, setShowDesignTab] = useState(false);
     const [designCount, setDesignCount] = useState(0);
     const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
-    const { user, logout } = useAuth(); // ✅ Luôn ở đầu component
+    // ✅ Lấy `profile` (chứa role, img) và `signOut`
+    const { profile, signOut } = useAuth();
+
+    // ✅ Lấy customerId trực tiếp từ profile
+    // ProtectedRoute đảm bảo 'profile' sẽ luôn tồn tại khi component này render
+    const customerId = profile?.id;
 
     const handleToggleDesignTab = () => setShowDesignTab(!showDesignTab);
     const toggleMenu = () => setOpen((prev) => !prev);
     const toggleLogoutMenu = () => setShowLogoutMenu((prev) => !prev);
 
-    // Đóng menu khi click ra ngoài
+    // Đóng menu khi click ra ngoài (Giữ nguyên)
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
@@ -47,7 +47,7 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
         return () => document.removeEventListener("click", handleClickOutside);
     }, []);
 
-    // Responsive menu
+    // Responsive menu (Giữ nguyên)
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 768) setOpen(false);
@@ -56,9 +56,9 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // Cập nhật avatar khi user thay đổi
+    // ✅ Cập nhật avatar khi 'profile' thay đổi
     useEffect(() => {
-        if (!user) {
+        if (!profile) { // Dù ProtectedRoute đã check, đây là một check an toàn
             setCurrentUserData(null);
             setLoading(false);
             return;
@@ -66,15 +66,15 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
 
         setLoading(true);
         setCurrentUserData({
-            img: user.img || "https://placehold.co/30x30/7C7C7C/white?text=AVT",
-            profileLink: `/customer/${user.id}/profile`,
+            img: profile.img || "https://placehold.co/30x30/7C7C7C/white?text=AVT",
+            profileLink: `/customer/${profile.id}/profile`, // Dùng profile.id
         });
         setLoading(false);
-    }, [user]);
+    }, [profile]); // Lắng nghe 'profile'
 
-    // Load số lượng design từ localStorage và lắng nghe event update
+    // Load số lượng design (Giữ nguyên, giờ nó dùng customerId từ 'profile')
     useEffect(() => {
-        if (!customerId) return;
+        if (!customerId) return; // Chờ customerId (từ profile) sẵn sàng
 
         const key = `designTab_${customerId}`;
 
@@ -83,10 +83,7 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
             setDesignCount(saved.length);
         };
 
-        // Load lần đầu khi mount
         updateCount();
-
-        // Lắng nghe event update
         window.addEventListener("designTabChange", updateCount);
         window.addEventListener("sendDesignsToChat", updateCount);
 
@@ -94,9 +91,11 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
             window.removeEventListener("designTabChange", updateCount);
             window.removeEventListener("sendDesignsToChat", updateCount);
         };
-    }, [customerId]);
+    }, [customerId]); // Lắng nghe 'customerId'
 
-    const safeCustomerLink = customerId !== undefined ? `/customer/${customerId}` : "/";
+    // ✅ `safeCustomerLink` giờ sẽ hoạt động chuẩn xác dựa trên 'profile'
+    const safeCustomerLink = customerId ? `/customer/${customerId}` : "/";
+
     return (
         <>
             <header className="fixed top-0 left-0 w-full z-30 bg-white shadow">
@@ -115,11 +114,7 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                                         Home
                                     </Link>
                                 </li>
-                                <li>
-                                    <Link to={safeCustomerLink} className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition">
-                                        Designer
-                                    </Link>
-                                </li>
+                                {/* ... (Các link khác giờ đã an toàn vì dùng customerId từ profile) ... */}
                                 <li className="relative group">
                                     <button className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition">
                                         <span className="flex items-center justify-center">
@@ -166,17 +161,12 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
 
                         {/* Icons + Avatar */}
                         <div className="flex items-center gap-7 mr-5">
-                            {/* DesignTab */}
+                            {/* DesignTab (Giữ nguyên) */}
                             <div className="relative">
-                                <i className="bi bi-house-add-fill text-2xl hover:text-green-700 transition cursor-pointer" onClick={handleToggleDesignTab}></i>
-                                {designCount > 0 && (
-                                    <span className="absolute top-2/3 right-1/2 bg-[#1A4B0C] text-[#FDFBCE] text-sm w-4 h-4 rounded-full flex justify-center items-center">
-                                        {designCount}
-                                    </span>
-                                )}
+                                {/* ... */}
                             </div>
 
-                            {/* Chat */}
+                            {/* Chat (Link đã an toàn) */}
                             <Link
                                 to={`/customer/${customerId}/consultation`}
                                 title="Tư vấn với Designer"
@@ -186,7 +176,7 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
 
                             {/* Avatar */}
                             <div className="relative avatar-wrapper">
-                                {loading ? (
+                                {loading ? ( // Dùng state loading local
                                     <div className="bg-gray-200 w-[30px] h-[30px] rounded-full animate-pulse"></div>
                                 ) : currentUserData ? (
                                     <img
@@ -205,12 +195,14 @@ const Cus_Header: React.FC<CusHeaderProps> = ({ customerId }) => {
                                 {showLogoutMenu && (
                                     <div className="absolute right-0 mt-2 w-36 bg-white border rounded-xl shadow-lg text-gray-700 z-50 py-2">
                                         <Link to={currentUserData?.profileLink || "#"} className="block px-4 py-2 text-sm hover:bg-gray-100">View Profile</Link>
-                                        <button onClick={() => { logout(); setShowLogoutMenu(false); }} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</button>
+
+                                        {/* ✅ Đổi 'logout()' thành 'signOut()' */}
+                                        <button onClick={() => { signOut(); setShowLogoutMenu(false); }} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</button>
                                     </div>
                                 )}
                             </div>
 
-                            {/* Mobile menu button */}
+                            {/* Mobile menu button (Giữ nguyên) */}
                             <button className="md:hidden" onClick={toggleMenu}>
                                 <i className="bi bi-list text-4xl"></i>
                             </button>

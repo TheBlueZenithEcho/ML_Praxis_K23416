@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-// SỬA 1: Import thêm useParams
-import { Outlet, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+// Sửa đổi import: Bỏ useNavigate, useParams. Thêm useAuth.
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   User,
   BarChart3,
@@ -11,55 +11,62 @@ import {
   X,
   LogOut
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext'; // Import AuthContext
 
 const DesignerLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
-  // SỬA 2: Lấy 'id' từ URL
-  const { id } = useParams();
+  // Lấy profile (chứa id) và hàm signOut từ Context
+  const { profile, signOut } = useAuth();
 
-  // SỬA 3: Dùng 'id' để tạo đường dẫn động (dynamic paths)
+  // Lấy id trực tiếp từ profile
+  const designerId = profile?.id;
+
+  // navItems giờ sẽ tự động dùng ID của người dùng đang đăng nhập
   const navItems = [
     {
       label: 'Profile',
       icon: <User size={20} />,
-      path: `/designer/${id}/profile`
+      path: `/designer/${designerId}/profile`
     },
     {
       label: 'Dashboard',
       icon: <BarChart3 size={20} />,
-      path: `/designer/${id}/dashboard`
+      path: `/designer/${designerId}/dashboard`
     },
     {
       label: 'Leads',
       icon: <Users size={20} />,
-      path: `/designer/${id}/leads`
+      path: `/designer/${designerId}/leads`
     },
     {
       label: 'Projects',
       icon: <FolderOpen size={20} />,
-      path: `/designer/${id}/projects`
+      path: `/designer/${designerId}/projects`
     },
     {
       label: 'Create Design',
       icon: <Palette size={20} />,
-      path: `/designer/${id}/designs/create`
+      path: `/designer/${designerId}/designs/create`
     }
   ];
 
   const isActive = (path: string) => {
-    // Logic 'isActive' này giờ sẽ hoạt động chính xác
+    if (!designerId) return false; // Check an toàn
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
-  const handleLogout = () => {
-    // TODO: Implement logout logic
-    console.log('Logging out...');
-    // SỬA (Thêm): Dùng /SignIn để khớp với App_both.tsx
-    navigate('/SignIn'); 
+  // Cập nhật hàm logout để dùng signOut
+  const handleLogout = async () => {
+    await signOut();
+    // Không cần navigate, AuthProvider và Route Guard sẽ tự động xử lý
   };
+
+  // Check an toàn (dù DesignerRoute đã check)
+  if (!profile) {
+    return <div className="h-screen w-full flex items-center justify-center">Đang tải...</div>;
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -81,8 +88,7 @@ const DesignerLayout: React.FC = () => {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
-          {/* SỬA 4: Link logo cũng cần trỏ về trang dashboard động */}
-          <Link to={`/designer/${id}/dashboard`} className="text-2xl font-bold font-serif">
+          <Link to={`/designer/${designerId}/dashboard`} className="text-2xl font-bold font-serif">
             Praxis
           </Link>
           <button
@@ -104,10 +110,9 @@ const DesignerLayout: React.FC = () => {
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-lg
                     transition-all duration-200
-                    ${
-                      isActive(item.path)
-                        ? 'bg-[#2B7516] text-white shadow-lg'
-                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    ${isActive(item.path)
+                      ? 'bg-[#2B7516] text-white shadow-lg'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                     }
                   `}
                 >
