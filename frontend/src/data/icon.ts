@@ -41,7 +41,7 @@ export const menuItems = [
     },
     { 
         id: 3, 
-        title: 'Users', 
+        title: 'Customers', 
         icon: 'bi bi-people-fill', 
         url: '/admin_users', 
         type: 'link' 
@@ -73,6 +73,5 @@ export const menuItems = [
         icon: 'bi bi-file-earmark-check-fill', 
         url: '/admin_quotation', 
         type: 'link' 
-    },
-    
+    }, 
 ];

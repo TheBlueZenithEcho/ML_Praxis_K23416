@@ -161,7 +161,7 @@ const Ad_ProductNew = () => {
 
   return (
     <div className='Ad_ProductNew p-6 md:p-10 bg-[#fcfcfc] min-h-screen'> {/* Thêm class nền và padding */}
-      <h1 className="text-2xl md:text-3xl font-semibold text-gray-700 mb-6">Add New Product</h1>
+      <h1 className="text-2xl md:text-3xl font-semibold text-gray-700 mb-6 pointer-events-none">Add New Product</h1>
       {/* Thêm hiệu ứng loading nhỏ khi đang submit */}
       {loading && <div className="fixed top-4 right-4"><CircularProgress size={24} /></div>}
 
@@ -188,7 +188,7 @@ const Ad_ProductNew = () => {
            <Button
               variant="outlined"
               onClick={handleUploadButtonClick}
-              disabled={loading}
+              disabled={true}
               size="small" // Giảm kích thước nút
             >
                {selectedFile ? `Change Image: ${selectedFile.name.substring(0,20)}...` : 'Choose Image from Computer'}
