@@ -1,27 +1,19 @@
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "../../context/AuthContext"; // ✅ dùng context thay cho Zustand
+// ❌ KHÔNG CẦN DÙNG useAuth ở đây
+// import { useAuth } from "../../context/AuthContext"; 
 import { supabase } from "../../lib/supabaseClient";
-import { a } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
+// ❌ XÓA IMPORT LỖI
+// import { a } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 
-// 🧩 Định nghĩa kiểu dữ liệu của người dùng
-interface User {
-    id: string;
-    img: string;
-    name: string;
-    role: "user";
-    email: string;
-    phone: string;
-    createdAt: string;
-}
-
-// mock API chứa danh sách user
-// const API_URL = "https://api.npoint.io/4a915d88732882680a44";
+// ❌ KHÔNG CẦN Interface này ở đây
+// interface User { ... }
 
 const RegisterForm: React.FC = () => {
     const navigate = useNavigate();
-    const { login } = useAuth(); // ✅ lấy login từ context
+    // ❌ KHÔNG CẦN login()
+    // const { login } = useAuth(); 
 
     // 📌 State lưu dữ liệu nhập
     const [name, setName] = useState("");
@@ -33,7 +25,8 @@ const RegisterForm: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [userProfile, setUserProfile] = useState<User | null>(null);
+    // ❌ KHÔNG CẦN State này
+    // const [userProfile, setUserProfile] = useState<User | null>(null);
 
 
     const DEFAULT_AVATAR_URL = "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=1600";
@@ -52,139 +45,49 @@ const RegisterForm: React.FC = () => {
         setIsLoading(true);
 
         try {
-            // Đảm bảo chỉ có thể tạo profile với role này
-            // const { data: roleData, error: roleError } = await supabase
-            //     .from('roles')
-            //     .select('id')
-            //     .eq('role_name', 'user')
-            //     .single();
-
-            // if (roleError || !roleData) {
-            //     setMessage("Lỗi hệ thống: Không tìm thấy ID vai trò 'user'. Vui lòng liên hệ Admin.");
-            //     setIsSuccess(false);
-            //     setIsModalOpen(true);
-            //     return;
-            // }
-            // const customerRoleId = roleData.id;
-
-            // --- Bước 1: Đăng ký người dùng mới bằng Supabase Auth ---
-            // const { data: authData, error: authError } = await supabase.auth.signUp({
-            //     email: email,
-            //     password: password,
-            //     options: {
-            //         data: { 
-            //             // Truyền Name vào raw_user_meta_data để trigger tạo profile sử dụng
-            //             name: name 
-            //         },
-            //     },
-            // });
-
-            // if (authError) {
-            //     // Xử lý các lỗi phổ biến như: mật khẩu quá ngắn, người dùng đã tồn tại
-            //     const msg = authError.message.includes("Password should be at least 6 characters")
-            //         ? "Mật khẩu phải có ít nhất 6 ký tự."
-            //         : authError.message.includes("User already registered")
-            //         ? "Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác."
-            //         : authError.message; // Giữ nguyên lỗi khác
-
-            //     setMessage("Đăng ký thất bại: " + msg);
-            //     setIsSuccess(false);
-            //     setIsModalOpen(true);
-            //     return;
-            // }
-
-            // // Kiểm tra: Nếu email xác thực đang bật, Supabase sẽ không trả về session, 
-            // // người dùng cần kiểm tra email trước.
-            // if (!authData.session) {
-            //     setMessage(
-            //         "Đăng ký thành công! Vui lòng kiểm tra email của bạn để xác nhận tài khoản trước khi đăng nhập."
-            //     );
-            //     setIsSuccess(true); // Coi là thành công nhưng chưa đăng nhập
-            //     setIsModalOpen(true);
-            //     return;
-            // }
-            // BẠN CHỈ CẦN GỌI HÀM NÀY, KHÔNG GỌI .insert() HAY .update()
+            // --- Bước 1: Chỉ cần gọi hàm signUp ---
+            // AuthContext sẽ tự động lắng nghe sự kiện
+            // và gọi RPC 'get_my_profile'
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: email,
                 password: password,
                 options: {
                     // Dữ liệu này sẽ được gửi đến trigger
-                    // thông qua 'NEW.raw_user_meta_data'
+                    // để tự động tạo profile
                     data: {
-                        name: name, // Dữ liệu từ form
-                        avatar_url: DEFAULT_AVATAR_URL, // Dữ liệu từ form
-                        source:'public_signup'
-
-                        // QUAN TRỌNG:
-                        // Client KHÔNG NÊN tự gán role.
-                        // Việc gán role nên được làm ở server (trong trigger)
-                        // để đảm bảo bảo mật.
+                        name: name,
+                        avatar_url: DEFAULT_AVATAR_URL,
+                        source: 'public_signup'
                     }
                 }
             });
 
             if (authError) {
-                // Xử lý lỗi đăng ký (email tồn tại, mật khẩu yếu...)
-                console.error("Sign up error:", authError);
-                setMessage(authError.message);
+                // Xử lý các lỗi phổ biến
+                const msg = authError.message.includes("Password should be at least 6 characters")
+                    ? "Mật khẩu phải có ít nhất 6 ký tự."
+                    : authError.message.includes("User already registered")
+                        ? "Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác."
+                        : authError.message; // Giữ nguyên lỗi khác
+
+                setMessage("Đăng ký thất bại: " + msg);
                 setIsSuccess(false);
                 setIsModalOpen(true);
                 return;
             }
 
-            if (authData.user) {
-                // Trigger SẼ tự động tạo profile.
-                // Client không cần làm gì thêm.
-                setMessage("Đăng ký thành công! Vui lòng kiểm tra email để xác thực.");
-                setIsSuccess(true);
-                setIsModalOpen(true);
-            }
-
-            if (!authData.session) {
-                setMessage(
-                    "Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản trước khi đăng nhập."
-                );
-                setIsSuccess(true);
-                setIsModalOpen(true);
-                return;
-            }
-
-            if (authData.user && authData.session) {
-                const userId = authData.user.id;
-                console.log("User registered with ID:", userId);
-
-                // --- Bước 2: Đăng ký thành công & Session có sẵn (Auto sign-in) ---
-                // Lấy hồ sơ (profile) đầy đủ bằng RPC, giống như trong Login
-                const { data: profileArray, error: rpcError } = await supabase.rpc('get_my_profile');
-
-                if (rpcError) {
-                    setMessage("Đăng ký thành công, nhưng không thể lấy hồ sơ người dùng: " + rpcError.message);
-                    setIsSuccess(true);
-                    setIsModalOpen(true);
-                    return;
-                }
-                const userProfile = profileArray ? profileArray[0] as User : null;
-                // if(userProfile)userProfile.phone= userProfile.phone?? "563 632 325";
-                // console.log("Hồ sơ người dùng sau đăng ký, them avatar, phone:", userProfile);
-
-                if (!userProfile) {
-                    setMessage("Đăng ký thành công, nhưng không tìm thấy hồ sơ người dùng. Vui lòng liên hệ hỗ trợ.");
-                    setIsSuccess(true);
-                    setIsModalOpen(true);
-                    return;
-                }
-
-               
-            // --- Bước 3: Lưu vào Context và Chuyển hướng ---
-            setUserProfile(userProfile);
-            login(userProfile);
-
-            setMessage(`Đăng ký thành công! Chào mừng ${userProfile.name}.`);
+            // --- Bước 2: Thông báo thành công ---
+            // (Áp dụng cho cả 2 trường hợp: auto-login hoặc email-confirm)
+            // AuthContext và Route Guards sẽ tự động xử lý việc chuyển hướng
+            setMessage(
+                "Đăng ký thành công! Vui lòng kiểm tra email của bạn để xác nhận tài khoản."
+            );
             setIsSuccess(true);
             setIsModalOpen(true);
 
-        }
-            
+            // ❌ KHÔNG GỌI RPC HAY login() TẠI ĐÂY
+            // Toàn bộ logic `if (authData.user && authData.session)`
+            // đã được chuyển về AuthContext xử lý
 
         } catch (error) {
             console.error("Lỗi đăng ký:", error);
@@ -195,22 +98,30 @@ const RegisterForm: React.FC = () => {
             setIsLoading(false);
         }
     };
+
     const closeModal = () => {
         setIsModalOpen(false);
         setMessage("");
 
-        // Nếu đăng ký thành công thì chuyển hướng
+        // ✅ SỬA LOGIC CHUYỂN HƯỚNG
         if (isSuccess) {
-            navigate(`/customer/${userProfile.id}`);
+            // Sau khi đăng ký, luôn chuyển người dùng đến trang Đăng nhập.
+            // 1. Nếu cần xác thực email, họ sẽ phải đăng nhập sau.
+            // 2. Nếu auto-login, họ sẽ được tự động chuyển hướng
+            //    từ trang SignIn đến dashboard bởi Route Guards.
+            navigate(`/SignIn`);
         }
     };
+
+    // ... (Phần Modal và UI Form giữ nguyên, không cần sửa)
     // 🔹 Modal thông báo kết quả đăng ký
     const StatusModal: React.FC = () => {
+        // ... (Giữ nguyên)
         const iconClass = isSuccess
             ? "bi bi-check-circle-fill text-green-600"
             : "bi bi-x-circle-fill text-red-600";
         const title = isSuccess ? "Registration Successful" : "Registration Failed";
-        const buttonText = isSuccess ? "Continue to Homepage" : "Try Again";
+        const buttonText = isSuccess ? "Go to Sign In" : "Try Again"; // Sửa text
         const colorClass = isSuccess
             ? "bg-green-500 hover:bg-green-600"
             : "bg-red-500 hover:bg-red-600";
@@ -274,6 +185,7 @@ const RegisterForm: React.FC = () => {
     return (
         <motion.form
             onSubmit={handleRegister}
+            // ... (Giữ nguyên UI)
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 100 }}

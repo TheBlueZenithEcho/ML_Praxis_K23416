@@ -28,7 +28,7 @@ const LoginForm = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const navigate = useNavigate();
-    const { login } = useAuth()
+    // const { login } = useAuth()
 
     // Hàm đóng Modal
     const closeModal = () => {
@@ -94,7 +94,7 @@ const LoginForm = () => {
     //     }
     // };
 
-        const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (email.trim() === "" || password.trim() === "") {
@@ -120,12 +120,13 @@ const LoginForm = () => {
                 setIsModalOpen(true);
                 return;
             }
-
+            // GHI CHÚ: Ngay sau khi Bước 1 thành công, 
+            // AuthContext (ở file khác) đã bắt đầu cập nhật session.
             // --- Bước 2: Lấy hồ sơ (profile) đầy đủ bằng RPC ---
             // Nếu đăng nhập thành công, gọi hàm 'get_my_profile'
             // Hàm này tự động biết auth.id (nhờ session ở Bước 1)
             const { data: profileArray, error: rpcError } = await supabase
-                .rpc('get_my_profile'); 
+                .rpc('get_my_profile');
             if (rpcError) {
                 // Lỗi này xảy ra nếu hàm RPC bị lỗi
                 setErrorMessage("Could not fetch user profile: " + rpcError.message);
@@ -145,11 +146,12 @@ const LoginForm = () => {
 
             // --- Bước 3: Lưu vào Context và Chuyển hướng ---
             // Dùng userProfile (đã bao gồm 'role') để gọi hàm login từ Context
-            login({
-                ...userProfile,
-                img: userProfile.avatar_url || "https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg"
-            }); 
-
+            // login({
+            //     ...userProfile,
+            //     img: userProfile.avatar_url || "https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg"
+            // });
+            // Chuyển hướng theo role
+            // AuthContext sẽ tự lấy profile bằng useEffect của nó.
             if (userProfile.role === "admin") {
                 navigate("/admin_home");
             } else {
@@ -228,11 +230,11 @@ const LoginForm = () => {
 
     return (
         <motion.form
-                    onSubmit={handleLogin}
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 100 }}
-                    className="loginForm relative z-10 bg-white/10 backdrop-blur-md rounded-3xl px-10 py-10 w-full flex flex-col items-center shadow-2xl">
+            onSubmit={handleLogin}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 100 }}
+            className="loginForm relative z-10 bg-white/10 backdrop-blur-md rounded-3xl px-10 py-10 w-full flex flex-col items-center shadow-2xl">
             {/* Modal hiển thị thông báo lỗi */}
             <ErrorModal />
             <div className="text-center mb-8">

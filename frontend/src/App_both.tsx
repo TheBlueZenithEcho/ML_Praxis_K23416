@@ -6,8 +6,8 @@ import {
   createBrowserRouter,
   RouterProvider,
   Navigate,
-  useParams, 
-} from 'react-router-dom'; 
+  useParams,
+} from 'react-router-dom';
 import { Toaster } from 'sonner';
 
 // --- CSS ---
@@ -17,9 +17,9 @@ import "./index.css";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // --- Layouts ---
-import LayoutGuest from './layouts/LayoutGuest'; 
-import LayoutCus from './layouts/LayoutCus';     
-import LayoutAdmin from './layouts/LayoutAdmin'; 
+import LayoutGuest from './layouts/LayoutGuest';
+import LayoutCus from './layouts/LayoutCus';
+import LayoutAdmin from './layouts/LayoutAdmin';
 // import DesignerLayout from './components/designer/layout/DesignerLayout';
 
 // --- Public Pages (Khách) ---
@@ -75,46 +75,86 @@ import Ad_DesignerNew from './components/admin/Ad_DesignerNew';
 
 // Bảo vệ route cho Customer
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
-  const { user } = useAuth();
-  if (!user) {
+  const { profile, loading } = useAuth();
+  // Nếu đang tải, hiển thị một thông báo (hoặc spinner)
+  // và KHÔNG làm gì cả cho đến khi có kết quả
+  if (loading) {
+    return <div style={{ padding: '20px', textAlign: 'center' }}>Đang xác thực...</div>;
+  }
+
+
+  if (!profile) {
     return <Navigate to="/SignIn" replace />;
   }
-  
-  if (user.role !== 'user') {
-    if (user.role === 'admin') return <Navigate to="/admin_home" replace />;
-    if (user.role === 'designer') return <Navigate to={`/designer/${user.id}/dashboard`} replace />;
+
+  if (profile.role !== 'user') {
+    if (profile.role === 'admin') return <Navigate to="/admin_home" replace />;
+    if (profile.role === 'designer') return <Navigate to={`/designer/${profile.id}/dashboard`} replace />;
   }
-  
+
   return children;
 };
 
 // Bảo vệ route cho Admin
+// const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+//   const { profile, loading } = useAuth();
+//   if (!profile) {
+//     return <Navigate to="/SignIn" replace />;
+//   }
+
+//   if (profile.role !== 'admin') {
+//     if (profile.role === 'user') return <Navigate to={`/customer/${profile.id}`} replace />;
+//     if (profile.role === 'designer') return <Navigate to={`/designer/${profile.id}/dashboard`} replace />;
+//   }
+
+//   return children;
+// };
+// Sửa lại AdminRoute (Áp dụng tương tự cho 2 cái còn lại)
 const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
-  const { user } = useAuth();
-  if (!user) {
+  const { profile, loading } = useAuth();
+
+  // 1. KIỂM TRA LOADING TRƯỚC
+  // Nếu đang tải, hiển thị một thông báo (hoặc spinner)
+  // và KHÔNG làm gì cả cho đến khi có kết quả
+  if (loading) {
+    return <div style={{ padding: '20px', textAlign: 'center' }}>Đang xác thực...</div>;
+  }
+
+  // 2. KIỂM TRA PROFILE (Sau khi đã hết loading)
+  // Nếu không có profile, lúc này mới chắc chắn là chưa đăng nhập
+  if (!profile) {
     return <Navigate to="/SignIn" replace />;
   }
-  
-  if (user.role !== 'admin') {
-    if (user.role === 'user') return <Navigate to={`/customer/${user.id}`} replace />;
-    if (user.role === 'designer') return <Navigate to={`/designer/${user.id}/dashboard`} replace />;
+
+  // 3. KIỂM TRA VAI TRÒ
+  if (profile.role !== 'admin') {
+    if (profile.role === 'user') return <Navigate to={`/customer/${profile.id}`} replace />;
+    if (profile.role === 'designer') return <Navigate to={`/designer/${profile.id}/dashboard`} replace />;
   }
-  
+
+  // 4. Hợp lệ
   return children;
 };
 
 // Bảo vệ route cho Designer
 const DesignerRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
-  const { user } = useAuth();
-  if (!user) {
+  const { profile, loading } = useAuth();
+  // Nếu đang tải, hiển thị một thông báo (hoặc spinner)
+  // và KHÔNG làm gì cả cho đến khi có kết quả
+  if (loading) {
+    return <div style={{ padding: '20px', textAlign: 'center' }}>Đang xác thực...</div>;
+  }
+
+
+  if (!profile) {
     return <Navigate to="/SignIn" replace />;
   }
-  
-  if (user.role !== 'designer') {
-    if (user.role === 'admin') return <Navigate to="/admin_home" replace />;
-    if (user.role === 'user') return <Navigate to={`/customer/${user.id}`} replace />;
+
+  if (profile.role !== 'designer') {
+    if (profile.role === 'admin') return <Navigate to="/admin_home" replace />;
+    if (profile.role === 'user') return <Navigate to={`/customer/${profile.id}`} replace />;
   }
-  
+
   return children;
 };
 
@@ -177,27 +217,29 @@ const router = createBrowserRouter([
       // (Giữ nguyên các route admin)
       { path: "/admin_home", element: <Ad_Home /> },
       { path: "/admin_users", element: <Ad_Users /> },
+      { path: "/admin_users/:id", element: <AvatarProfile /> }, // <-- SỬA 1: Di chuyển vào đây
       { path: "/admin_designers", element: <Ad_Designers /> },
       { path: "/admin_products", element: <Ad_Products /> },
-      
+
       // ⭐️⭐️⭐️ SỬA LỖI 404: THÊM DÒNG PATH NÀY VÀO ⭐️⭐️⭐️
       { path: "/admin_designer/new", element: <Ad_DesignerNew /> },
       // ⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️
-      
+
       { path: "/admin_products/new", element: <Ad_ProductNew /> },
-      { path: "/admin/:id", element: <AvatarProfile /> }, // Đây là profile của Admin
-      
+      { path: "/admin_products/:id", element: <ProductProfile /> }, // <-- SỬA 2: Di chuyển vào đây
+      // { path: "/admin/:id", element: <AvatarProfile /> }, // Đây là profile của Admin
+
       // (Path xem profile designer của Admin)
       { path: "/desad/:id", element: <AvatarProfile /> },
 
       { path: "/users/:id", element: <AvatarProfile /> },
       { path: "/products/:id", element: <ProductProfile /> },
       { path: "/admin_interior", element: <Ad_Interior /> },
-      { path: "/admin_interior/:id", element: <InteriorProfile /> }, 
+      { path: "/admin_interior/:id", element: <InteriorProfile /> },
       { path: "/admin_approval", element: <Ad_Approval /> },
       { path: "/admin_approval/:id", element: <InteriorApprovalProfile /> },
       { path: "/admin_quotation", element: <Ad_Quotation /> },
-      { path: "/admin_quotation/:id", element: <QuotationProfile/> },
+      { path: "/admin_quotation/:id", element: <QuotationProfile /> },
     ],
   },
 
@@ -206,7 +248,7 @@ const router = createBrowserRouter([
    */
   {
     // Path này đã đúng, nó không còn bị xung đột nữa
-    path: "/designer/:id", 
+    path: "/designer/:id",
     element: (
       <DesignerRoute>
         <DesignerLayout />
