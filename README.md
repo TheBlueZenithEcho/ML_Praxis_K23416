@@ -29,8 +29,12 @@ supabase stop
 supabase migration new <file_name>
 ```
 2. Mở file SQL đó trong `supabase/migrations/` và thêm lệnh SQL
+3. Apply only new migrations locally
+```
+supabase migration up
+```
 
-3. Áp dụng migration vào CSDL local
+4. Clear local db and  apply all migrations saved back into db
 ```
 supabase db reset
 ```
@@ -39,17 +43,17 @@ supabase db reset
 1. Create a free account and get redirected to the dashboard.
 2. Create a project
 3. Save SUPABASE_URL (with account id), SUPABASE_
-4. Apply migration up cloud (or supabase link --project--ref <supabase_project_id> first)
-Note: only pull when connected to ivp4 internet
+4. Pull db cloud to sync locally (or supabase link --project--ref <supabase_project_id> first)
+Note: only directly apply migrations upstream when connected to ivp4 internet
 ```
-supabase migration up
+supabase db pull
 ```
-5. Push to supabase cloud
+If too many changes => ```supabase db reset```
+5. Push db local to sync supabase cloud (maybe applicable for local-first workflow)
 Note: only push when connected to ivp4 internet
 ```
 supabase db push
 ```
-This was the setup flow from local db.
 
 
 ### Important info for db local backup
