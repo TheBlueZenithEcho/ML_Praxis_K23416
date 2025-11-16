@@ -14,12 +14,11 @@ type DesignerData = {
     id: string;         // p.id (uuid -> string)
     img: string | null; // p.avatar_url (text -> string | null)
     name: string | null;// p.name (text -> string | null)
-    role: string;       // r.role_name (text -> string)
-    email: string;      // u.email (text -> string)
-    phone: string | null; // u.phone (text -> string | null)
-    createdAt: string;  // u.created_at (timestamptz -> string)
+    // role: string;    // <-- Không còn trả về từ RPC
+    email: string | null; // p.email (text -> string | null)
+    phone: string | null; // p.phone (text -> string | null)
+    createdAt: string;  // p.created_at (timestamptz -> string)
 };
-
 // Hàm tạo link (Đã đơn giản hóa vì view này CHỈ trả về designer)
 const getProfileLink = (user: DesignerData): string => {
     return `/desad/${user.id}`;
@@ -98,17 +97,13 @@ const DesignersTable = () => {
         }
     ], [handleDelete]);
 
-    // useEffect fetch (Dọn dẹp logic)
     useEffect(() => {
         const fetchDesigners = async () => {
             setLoading(true);
             try {
-                // Gọi VIEW 'all_designers'
+                // Gọi hàm RPC 'get_all_designers'
                 const { data, error } = await supabase
-                    .from('all_designers') // View này đã filter 'designer'
-                    .select('*')
-                    .order('created_at', { ascending: false }); // Sắp xếp mới nhất lên đầu
-
+                    .rpc('get_all_designers');
                 if (error) {
                     console.error('Lỗi khi lấy dữ liệu designers:', error);
                     throw error;
