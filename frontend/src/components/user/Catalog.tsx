@@ -16,7 +16,7 @@ const API_URL = "https://api.npoint.io/3619c3ea1583a5bd1216";
 
 const Catalog = () => {
     // Danh mục được giữ nguyên theo yêu cầu
-    const categories = ["living Room", "bed room", "kitchen"];
+    const categories = ["Bed Room", "Living Room", "Kitchen"];
     const [activeCategory, setActiveCategory] = useState(categories[0]);
 
     // Trạng thái dữ liệu

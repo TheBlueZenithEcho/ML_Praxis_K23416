@@ -110,10 +110,10 @@ const DesignCarousel: React.FC<DesignCarouselProps> = ({ designs, loading, error
                                     </button>
                                 </div>
 
-                                <div className="p-4 h-1/4 flex flex-col justify-center">
-                                    <h3 className="font-semibold text-lg truncate">{design.name}</h3>
-                                    <p className="text-gray-600 text-sm">Designer: {design.designer}</p>
-                                    <p className="text-gray-600 text-sm">Room: {design["type room"]}</p>
+                                <div className="pl-4 pr-4 h-1/4 flex flex-col justify-center pb-1">
+                                    <h3 className="font-semibold text-[32] truncate font-lora">{design.name}</h3>
+                                    <p className="text-gray-600 text-sm font-lora">Designer: {design.designer}</p>
+                                    <p className="text-gray-600 text-xs font-lora">Room: {design["type room"]}</p>
                                 </div>
                             </div>
                         </div>

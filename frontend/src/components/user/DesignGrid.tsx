@@ -81,7 +81,7 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
     if (loading)
         return (
             <div className="h-[420px] flex items-center justify-center">
-                <p>Đang tải thiết kế...</p>
+                <p>Loading design….</p>
             </div>
         );
 
@@ -95,7 +95,7 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
     if (visibleDesigns.length === 0)
         return (
             <div className="h-[420px] flex items-center justify-center">
-                <p>Không tìm thấy thiết kế nào cho {category}.</p>
+                <p>No designs found for {category}.</p>
             </div>
         );
 
@@ -130,13 +130,13 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
                                     </button>
                                 </div>
                                 <div className="p-3">
-                                    <h3 className="font-semibold text-base truncate text-gray-900">
+                                    <h3 className="font-semibold text-base truncate text-gray-900 text-[32px] font-lora">
                                         {design.name}
                                     </h3>
-                                    <p className="text-gray-600 text-sm mt-1">
+                                    <p className="text-gray-600 text-sm mt-1 font-lora">
                                         Designer: {design.designer}
                                     </p>
-                                    <p className="text-gray-600 text-xs">
+                                    <p className="text-gray-600 text-xs mt-1 font-lora">
                                         Room: {design["type room"]}
                                     </p>
                                 </div>

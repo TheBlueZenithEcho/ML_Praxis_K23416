@@ -35,7 +35,7 @@ const Header = () => {
                         <div className="hidden md:block ">
                             <ul className="flex items-center text-gray-950 gap-12 ">
                                 <li className="text-center"><a href="/" className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition-colors duration-300">Home</a></li>
-                                <li className="text-center"><a href="#" className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition-colors duration-300">Designer</a></li>
+                                <li className="text-center"><a href="#" className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition-colors duration-300">About</a></li>
                                 <li className="text-center relative group">
                                     <a
                                         href="#"
@@ -55,7 +55,7 @@ const Header = () => {
                                         <li>
                                             <Link
                                                 to="/bedroom"
-                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold "
                                             >
                                                 Bedroom
                                             </Link>
@@ -63,7 +63,7 @@ const Header = () => {
                                         <li>
                                             <Link
                                                 to="/livingroom"
-                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold "
                                             >
                                                 Living Room
                                             </Link>
@@ -71,15 +71,15 @@ const Header = () => {
                                         <li >
                                             <Link
                                                 to="/kitchen"
-                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold "
                                             >
                                                 Kitchen
                                             </Link>
                                         </li>
                                     </ul>
                             </li>
-                                <li>
-                                    <Link to="/contact" className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition">Contact</Link>
+                                <li className="text-center">
+                                    <Link to="/contact" className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition-colors duration-300">Contact</Link>
                                 </li>
                             </ul>
                         </div>

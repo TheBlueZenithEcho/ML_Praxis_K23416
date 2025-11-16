@@ -2,52 +2,45 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ResponsiveMenu from "./ResponsiveMenu";
 import DesignTab from "./DesignTab";
-import { useAuth } from "../../context/AuthContext"; // ✅ Đã dùng context mới
-
-// ❌ Không cần interface này nữa
-// interface CusHeaderProps {
-//     customerId: string | undefined; 
-// }
-
-// ❌ Không cần interface User cũ này nữa
-// interface User { ... }
+import { useAuth } from "../../context/AuthContext";
 
 interface HeaderUserData {
     img: string;
     profileLink: string;
 }
 
-// ✅ Không cần nhận prop `customerId`
 const Cus_Header: React.FC = () => {
     const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(true); // Giữ state loading local cho avatar
-    const [currentUserData, setCurrentUserData] = useState<HeaderUserData | null>(null);
     const [showDesignTab, setShowDesignTab] = useState(false);
     const [designCount, setDesignCount] = useState(0);
     const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
-    // ✅ Lấy `profile` (chứa role, img) và `signOut`
+    // Loader riêng cho avatar để không ảnh hưởng session loading
+    const [avatarLoading, setAvatarLoading] = useState(true);
+    const [currentUserData, setCurrentUserData] = useState<HeaderUserData | null>(null);
+
+    // Dùng AuthContext
     const { profile, signOut } = useAuth();
 
-    // ✅ Lấy customerId trực tiếp từ profile
-    // ProtectedRoute đảm bảo 'profile' sẽ luôn tồn tại khi component này render
-    const customerId = profile?.id;
+    // ❗ customerId được lấy từ profile (id Supabase)
+    const customerId = profile?.id ?? null;
 
-    const handleToggleDesignTab = () => setShowDesignTab(!showDesignTab);
+    // Toggle
+    const toggleDesignTab = () => setShowDesignTab((prev) => !prev);
     const toggleMenu = () => setOpen((prev) => !prev);
     const toggleLogoutMenu = () => setShowLogoutMenu((prev) => !prev);
 
-    // Đóng menu khi click ra ngoài (Giữ nguyên)
+    // ❌ Đóng menu avatar khi click ra ngoài
     useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
+        const handler = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
             if (!target.closest(".avatar-wrapper")) setShowLogoutMenu(false);
         };
-        document.addEventListener("click", handleClickOutside);
-        return () => document.removeEventListener("click", handleClickOutside);
+        document.addEventListener("click", handler);
+        return () => document.removeEventListener("click", handler);
     }, []);
 
-    // Responsive menu (Giữ nguyên)
+    // ❌ Auto close menu khi resize
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 768) setOpen(false);
@@ -56,34 +49,37 @@ const Cus_Header: React.FC = () => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // ✅ Cập nhật avatar khi 'profile' thay đổi
+    // ✅ Avatar tự cập nhật mỗi khi profile thay đổi
     useEffect(() => {
-        if (!profile) { // Dù ProtectedRoute đã check, đây là một check an toàn
+        if (!profile) {
             setCurrentUserData(null);
-            setLoading(false);
+            setAvatarLoading(false);
             return;
         }
 
-        setLoading(true);
-        setCurrentUserData({
-            img: profile.img || "https://placehold.co/30x30/7C7C7C/white?text=AVT",
-            profileLink: `/customer/${profile.id}/profile`, // Dùng profile.id
-        });
-        setLoading(false);
-    }, [profile]); // Lắng nghe 'profile'
+        setAvatarLoading(true);
 
-    // Load số lượng design (Giữ nguyên, giờ nó dùng customerId từ 'profile')
+        setCurrentUserData({
+            img: profile.img || "",
+            profileLink: `/customer/${profile.id}/profile`,
+        });
+
+        setAvatarLoading(false);
+    }, [profile]);
+
+    // ✅ Load số lượng design trong localStorage theo customerId
     useEffect(() => {
-        if (!customerId) return; // Chờ customerId (từ profile) sẵn sàng
+        if (!customerId) return;
 
         const key = `designTab_${customerId}`;
 
         const updateCount = () => {
-            const saved: any[] = JSON.parse(localStorage.getItem(key) || "[]");
+            const saved = JSON.parse(localStorage.getItem(key) || "[]");
             setDesignCount(saved.length);
         };
 
         updateCount();
+
         window.addEventListener("designTabChange", updateCount);
         window.addEventListener("sendDesignsToChat", updateCount);
 
@@ -91,9 +87,9 @@ const Cus_Header: React.FC = () => {
             window.removeEventListener("designTabChange", updateCount);
             window.removeEventListener("sendDesignsToChat", updateCount);
         };
-    }, [customerId]); // Lắng nghe 'customerId'
+    }, [customerId]);
 
-    // ✅ `safeCustomerLink` giờ sẽ hoạt động chuẩn xác dựa trên 'profile'
+    // Safe link cho Home/About khi chưa có customerId
     const safeCustomerLink = customerId ? `/customer/${customerId}` : "/";
 
     return (
@@ -110,22 +106,26 @@ const Cus_Header: React.FC = () => {
                         <div className="hidden md:block">
                             <ul className="flex items-center text-gray-950 gap-12">
                                 <li>
-                                    <Link to={safeCustomerLink} className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition">
+                                    <Link to={safeCustomerLink} className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition text-center">
                                         Home
                                     </Link>
                                 </li>
-                                {/* ... (Các link khác giờ đã an toàn vì dùng customerId từ profile) ... */}
+                                <li>
+                                    <Link to={safeCustomerLink} className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition text-center">
+                                        About
+                                    </Link>
+                                </li>
                                 <li className="relative group">
-                                    <button className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition">
+                                    <button className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition text-center">
                                         <span className="flex items-center justify-center">
                                             Type Rooms <i className="bi bi-caret-down-fill text-xs ml-1"></i>
                                         </span>
                                     </button>
-                                    <ul className="top-[100%] absolute left-0 hidden group-hover:block bg-white text-[#143E08] rounded-lg w-40 z-20 opacity-0 group-hover:opacity-100 shadow-md transition">
+                                    <ul className="top-[110%] absolute left-0 hidden group-hover:block bg-white text-[#143E08] rounded-lg w-40 z-20 opacity-0 group-hover:opacity-100 shadow-md transition pt-2">
                                         <li>
                                             <Link
                                                 to={customerId ? `/customer/${customerId}/bedroom` : "/bedroom"}
-                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold "
                                             >
                                                 Bedroom
                                             </Link>
@@ -133,7 +133,7 @@ const Cus_Header: React.FC = () => {
                                         <li>
                                             <Link
                                                 to={customerId ? `/customer/${customerId}/livingroom` : "/livingroom"}
-                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold "
                                             >
                                                 Living Room
                                             </Link>
@@ -141,7 +141,7 @@ const Cus_Header: React.FC = () => {
                                         <li>
                                             <Link
                                                 to={customerId ? `/customer/${customerId}/kitchen` : "/kitchen"}
-                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold nav-link"
+                                                className="block px-8 py-3 text-left hover:bg-[#E6F3E6] transition hover:font-semibold "
                                             >
                                                 Kitchen
                                             </Link>
@@ -151,8 +151,7 @@ const Cus_Header: React.FC = () => {
                                 <li>
                                     <Link
                                         to={customerId ? `/customer/${customerId}/contact` : "/contact"}
-                                        className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition"
-                                    >
+                                        className="block py-1 w-[120px] font-semibold nav-link hover:text-[#143E08] transition text-center">
                                         Contact
                                     </Link>
                                 </li>
@@ -163,12 +162,17 @@ const Cus_Header: React.FC = () => {
                         <div className="flex items-center gap-7 mr-5">
                             {/* DesignTab (Giữ nguyên) */}
                             <div className="relative">
-                                {/* ... */}
+                                <i className="bi bi-house-add-fill text-2xl hover:text-green-700 transition cursor-pointer" onClick={toggleDesignTab}></i>
+                                {designCount > 0 && (
+                                    <span className="absolute top-1/2 left-1/2 bg-yellow-200 text-[#1A4B0C] text-[10px] font-inter font-semibold w-4 h-4 rounded-full flex justify-center items-center">
+                                        {designCount}
+                                    </span>
+                                )}
                             </div>
 
                             {/* Chat (Link đã an toàn) */}
                             <Link
-                                to={`/customer/${customerId}/consultation`}
+                                to={customerId ? `/customer/${customerId}/consultation` : "/consultation"}
                                 title="Tư vấn với Designer"
                             >
                                 <i className="bi bi-wechat text-2xl hover:text-green-700 transition cursor-pointer"></i>
@@ -176,7 +180,7 @@ const Cus_Header: React.FC = () => {
 
                             {/* Avatar */}
                             <div className="relative avatar-wrapper">
-                                {loading ? ( // Dùng state loading local
+                                {avatarLoading ? ( // Dùng state loading local
                                     <div className="bg-gray-200 w-[30px] h-[30px] rounded-full animate-pulse"></div>
                                 ) : currentUserData ? (
                                     <img
@@ -211,7 +215,7 @@ const Cus_Header: React.FC = () => {
                 </nav>
                 <ResponsiveMenu open={open} setOpen={setOpen} />
             </header>
-            <DesignTab open={showDesignTab} onClose={handleToggleDesignTab} />
+            <DesignTab open={showDesignTab} onClose={toggleDesignTab} />
         </>
     );
 };

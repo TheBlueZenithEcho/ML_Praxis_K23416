@@ -37,6 +37,7 @@ import About from './pages/user/About';
 import Cus_HomePage from "./pages/user/Cus_HomePage";
 import ConsultationPage from './pages/user/ConsultationPage';
 
+
 // --- Admin Pages ---
 import Ad_Home from './pages/admin/Ad_Home';
 import Ad_Users from './pages/admin/Ad_Users';
@@ -65,6 +66,7 @@ import DesignerLayout from './layouts/LayoutDesigner';
 
 // ⭐️⭐️⭐️ SỬA LỖI 404: THÊM DÒNG IMPORT NÀY ⭐️⭐️⭐️
 import Ad_DesignerNew from './components/admin/Ad_DesignerNew';
+import Cus_Profile from './pages/user/Cus_Profile';
 // ⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️
 
 /*
@@ -198,7 +200,8 @@ const router = createBrowserRouter([
       { path: "livingRoom", element: <LivingRoom /> },
       { path: "bedRoom", element: <BedRoom /> },
       { path: "kitchen", element: <Kitchen /> },
-      { path: "consultation", element: (<ConsultationPage />), }
+      { path: "consultation", element: (<ConsultationPage />)},
+      { path: "profile", element: <Cus_Profile/> },
 
     ],
   },

@@ -1,32 +1,38 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-// ❌ KHÔNG CẦN DÙNG useAuth ở đây
-// import { useAuth } from "../../context/AuthContext"; 
 import { supabase } from "../../lib/supabaseClient";
 // ❌ XÓA IMPORT LỖI
 // import { a } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 
-// ❌ KHÔNG CẦN Interface này ở đây
-// interface User { ... }
+// 🧩 Định nghĩa kiểu dữ liệu của người dùng
+interface User {
+    id: string;
+    img: string;
+    name: string;
+    role: "user";
+    email: string;
+    phone: string;
+    createdAt: string;
+}
+// mock API chứa danh sách user
+// const API_URL = "https://api.npoint.io/4a915d88732882680a44";
 
 const RegisterForm: React.FC = () => {
     const navigate = useNavigate();
-    // ❌ KHÔNG CẦN login()
-    // const { login } = useAuth(); 
 
-    // 📌 State lưu dữ liệu nhập
+    // State lưu dữ liệu nhập
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    // 📌 State cho modal
+
+    // State cho modal
     const [message, setMessage] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    // ❌ KHÔNG CẦN State này
-    // const [userProfile, setUserProfile] = useState<User | null>(null);
+    const [userProfile, setUserProfile] = useState<User | null>(null);
 
 
     const DEFAULT_AVATAR_URL = "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=1600";
