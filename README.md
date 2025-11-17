@@ -1,5 +1,10 @@
 # ML_Praxis_K23416
 Praxis: An AI-powered web platform for interior designers to manage catalogs, create mood boards, and collaborate with clients.
+# Important files
+
+[Folder containing final model and secret codes for .env ](https://drive.google.com/drive/folders/14VyIQj3w3N1iKJWgzjFWI1f1FAZxVjag?usp=drive_link), only authorized email can access
+ 
+.env files must be placed at root folder of the project required to access supabase or r2 or both.
 
 # CSDL
 ## Supabase
@@ -81,8 +86,6 @@ API URL: http://127.0.0.1:54321
 
        S3 Region: local
 
-### Important info for ACTUAL Cloud DB:
-[Link to .env files]() - must be placed at root folder of the project required to access supabase, including 1 .env file with fewer keys and less privilege for frontend and 1 .env file with all keys for both Supabase DB and Cloudflare R2 object storage.
 
 - To sync Supabase db migrations MUST Use ipv4 network (not ipv6). 
 - Front end access via API is available for both protocols.
