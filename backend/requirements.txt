@@ -1,0 +1,11 @@
+flask
+flask-cors
+torch
+torchvision
+lightning
+transformers
+requests
+numpy
+sentence-transformers
+supabase
+python-dotenv
