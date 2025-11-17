@@ -1,15 +1,14 @@
-ML_Praxis_K23416
+# ML_Praxis_K23416
 Praxis: An AI-powered web platform for interior designers to manage catalogs, create mood boards, and collaborate with clients.
 
-Đây là hướng dẫn để chạy API Server (Flask) local, sử dụng mô hình .ckpt để tạo vector và tìm kiếm trên CSDL Supabase.
+Đây là hướng dẫn để chạy API Server (Flask) local, sử dụng mô hình `.ckpt` để tạo vector và tìm kiếm trên CSDL Supabase.
 
-Mở thư mục backend bằng một cửa sổ mới và thực hiện lần lượt các bước sau:
+Mở thư mục `backend` bằng một cửa sổ mới và thực hiện lần lượt các bước sau:
 
-Bước 1: Cấu trúc Thư mục
+## Bước 1: Cấu trúc Thư mục
 Hãy đảm bảo bạn có cấu trúc thư mục như sau:
 
-Plaintext
-
+```text
 /your-api-project/      (Thư mục gốc của ứng dụng Flask API)
 ├── app.py              (Server API: Chạy server Flask, xử lý /api/search, tạo embeddings)
 ├── lightning_clip.py   (Model Definition: Định nghĩa lớp LightningCLIP)
@@ -17,6 +16,7 @@ Plaintext
 ├── requirements.txt    (Dependencies: Danh sách thư viện Python)
 ├── .env                (Cấu hình: Chứa SUPABASE_URL, SUPABASE_SERVICE_KEY)
 └── model.ckpt          (Model Weights: File checkpoint của mô hình)
+
 Bước 2: Điền thông tin Bí mật (File .env)
 Tạo một file mới tên là .env trong thư mục backend. Điền thông tin Supabase vào
 
