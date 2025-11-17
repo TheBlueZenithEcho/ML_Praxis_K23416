@@ -6,55 +6,55 @@ type TopKeyword = {
   mentions: number;
 };
 
-const API_TOP_WORDS_URL = 'https://api.npoint.io/add6a2d6694e8034cbff'; 
+const API_TOP_WORDS_URL = 'https://api.npoint.io/add6a2d6694e8034cbff';
 
 const TopwordBox = () => {
   const [keywords, setKeywords] = useState<TopKeyword[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // SỬA 1: Thêm state để lưu số lượt cao nhất
   const [maxMentions, setMaxMentions] = useState<number>(1); // Bắt đầu từ 1 để tránh lỗi chia cho 0
 
   useEffect(() => {
     const fetchTopWords = async () => {
       try {
-        setLoading(true); 
+        setLoading(true);
         setError(null);
 
         const response = await fetch(API_TOP_WORDS_URL);
         if (!response.ok) {
           throw new Error('Không thể tải dữ liệu từ API');
         }
-        
-        const responseData = await response.json(); 
-        let data: TopKeyword[] = []; 
+
+        const responseData = await response.json();
+        let data: TopKeyword[] = [];
 
         if (Array.isArray(responseData)) {
-            data = responseData;
+          data = responseData;
         } else if (responseData && Array.isArray(responseData.topKeywords)) {
-            data = responseData.topKeywords;
+          data = responseData.topKeywords;
         } else {
-            throw new Error('Cấu trúc API không hợp lệ');
+          throw new Error('Cấu trúc API không hợp lệ');
         }
 
         const sortedData = data.sort((a, b) => b.mentions - a.mentions);
-        
+
         // SỬA 2: Tìm và lưu lại số lượt cao nhất
         const max = sortedData[0]?.mentions || 1;
         setMaxMentions(max);
-        
-        setKeywords(sortedData); 
+
+        setKeywords(sortedData);
 
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Lỗi không xác định');
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
     fetchTopWords();
-  }, []); 
+  }, []);
 
   // Hàm render nội dung
   const renderContent = () => {
@@ -72,7 +72,7 @@ const TopwordBox = () => {
     if (error) {
       return <div className="text-red-500">Lỗi: {error}</div>;
     }
-    
+
     // SỬA 4: Cập nhật lại cấu trúc JSX để thêm thanh bar
     return (
       <div className="flex flex-col gap-2"> {/* Giảm gap để list sát hơn */}
@@ -81,8 +81,8 @@ const TopwordBox = () => {
           const barWidth = (item.mentions / maxMentions) * 100;
 
           return (
-            <div 
-              key={item.id} 
+            <div
+              key={item.id}
               className="relative w-full rounded-md overflow-hidden" // Container chính
             >
               {/* Thanh Bar (nằm ở dưới) */}
@@ -90,7 +90,7 @@ const TopwordBox = () => {
                 className="absolute top-0 left-0 h-full bg-[#FFE797]/40" // Dùng màu của title nhưng làm mờ
                 style={{ width: `${barWidth}%` }}
               ></div>
-              
+
               {/* Nội dung (nằm ở trên) */}
               <div className="relative z-10 flex justify-between items-center p-2.5">
                 <div className="flex items-center gap-x-3">

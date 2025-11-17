@@ -28,7 +28,7 @@ type QuotationSummary = {
     totalAmount: number;
 };
 type QuotationData = {
-    id: string; 
+    id: string;
     projectTitle: string;
     customerName: string;
     designerName: string;
@@ -56,10 +56,10 @@ const QuotationGrid = () => {
                     throw new Error(`Lỗi HTTP! status: ${response.status}`);
                 }
                 const data: QuotationData[] = await response.json();
-                
+
                 // Lọc những báo giá 'PENDING_APPROVAL'
                 const pendingData = data.filter(item => item.status === 'PENDING_APPROVAL');
-                
+
                 setQuotations(pendingData);
 
             } catch (err) {
@@ -101,24 +101,24 @@ const QuotationGrid = () => {
         <div className='QuotationGrid p-4'>
             {/* Thanh tìm kiếm */}
             <div className="flex justify-end items-center px-4 pt-0 pb-4">
-                <TextField 
-                   variant="standard" 
-                   placeholder="Tìm project, khách hàng..." 
-                   value={searchText}
-                   onChange={(e) => setSearchText(e.target.value)}
-                   InputProps={{ 
-                       startAdornment: (
-                           <InputAdornment position="start">
-                               <SearchIcon />
-                           </InputAdornment>
-                       ), 
-                   }}
+                <TextField
+                    variant="standard"
+                    placeholder="Tìm project, khách hàng..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
                 />
             </div>
 
             {/* Danh sách báo giá */}
             <Box className="flex flex-col gap-4">
-                
+
                 {filteredQuotations.length === 0 && (
                     <Paper elevation={2} className="p-8">
                         <Typography className="text-center text-gray-500">
@@ -126,10 +126,10 @@ const QuotationGrid = () => {
                         </Typography>
                     </Paper>
                 )}
-                
+
                 {filteredQuotations.map((item) => {
                     const imageUrl = item.lineItems[0]?.imageUrl || 'https://via.placeholder.com/150';
-                    
+
                     return (
                         <Paper
                             key={item.id}
@@ -138,13 +138,13 @@ const QuotationGrid = () => {
                         >
                             <Box className="flex flex-col md:flex-row items-center gap-4">
                                 {/* 1. Ảnh */}
-                                <Avatar 
-                                    src={imageUrl} 
+                                <Avatar
+                                    src={imageUrl}
                                     alt={item.projectTitle}
                                     variant="rounded"
                                     sx={{ width: 80, height: 80 }}
                                 />
-                                
+
                                 {/* 2. Thông tin chính */}
                                 <Box className="flex-1 text-center md:text-left">
                                     <Typography variant="h6" className="font-semibold truncate">

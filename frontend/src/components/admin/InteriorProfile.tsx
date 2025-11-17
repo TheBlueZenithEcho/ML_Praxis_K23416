@@ -3,11 +3,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-    TextField, 
-    Button, 
-    Avatar, 
-    CircularProgress, 
+import {
+    TextField,
+    Button,
+    Avatar,
+    CircularProgress,
     Paper,
     Typography,
     Box,
@@ -37,7 +37,7 @@ type InteriorProfileType = {
     tags: string[];
     products: ProductInList[];
     // Giả sử có designer (nếu không có thì xóa đi)
-    designer?: string; 
+    designer?: string;
 };
 // ------------------------------------
 
@@ -47,23 +47,23 @@ const InteriorProfile = () => {
     const [interior, setInterior] = useState<InteriorProfileType | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    
+
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // --- SỬA 2: Logic gọi API (Tìm bằng designId) ---
     useEffect(() => {
         if (!id) return;
-        
+
         const fetchData = async () => {
             setLoading(true);
             setError(null);
             try {
-                const response = await fetch(MOCK_API_GET_LIST_URL); 
+                const response = await fetch(MOCK_API_GET_LIST_URL);
                 if (!response.ok) throw new Error(`Lỗi HTTP! status: ${response.status}`);
-                
+
                 const data: InteriorProfileType[] = await response.json();
-                
+
                 // Sửa logic tìm kiếm: Dùng 'designId' (string)
                 const foundItem = data.find(item => item.designId === id);
 
@@ -99,10 +99,10 @@ const InteriorProfile = () => {
     };
 
     const handleDeleteInterior = () => {
-         if (window.confirm("Bạn có chắc muốn xóa?")) {
+        if (window.confirm("Bạn có chắc muốn xóa?")) {
             alert("Đã xóa (giả lập)");
             navigate('/admin_interior'); // Điều hướng về trang Interior chính
-         }
+        }
     };
 
     // --- Render ---
@@ -113,7 +113,7 @@ const InteriorProfile = () => {
         return <div className="p-4 text-red-600 bg-red-100 rounded">{`Lỗi: ${error}`}</div>;
     }
     if (!interior) {
-         return <div className="p-4 text-gray-500">Không tìm thấy dữ liệu.</div>;
+        return <div className="p-4 text-gray-500">Không tìm thấy dữ liệu.</div>;
     }
 
     // --- SỬA 3: Cập nhật JSX ---
@@ -131,40 +131,40 @@ const InteriorProfile = () => {
                             onClick={() => fileInputRef.current?.click()}
                             variant="rounded"
                         />
-                        <input type="file" ref={fileInputRef} onChange={(e) => e.target.files && setAvatarFile(e.target.files[0])} hidden accept="image/*"/>
-                        
+                        <input type="file" ref={fileInputRef} onChange={(e) => e.target.files && setAvatarFile(e.target.files[0])} hidden accept="image/*" />
+
                         <div className="flex-1 text-center md:text-left">
                             <Typography variant="h4" component="h1" className="font-bold">{interior.title}</Typography>
                             {/* Giả sử có trường designer, nếu API không có thì xóa dòng này */}
                             <Typography variant="subtitle1" color="textSecondary">
                                 Designer: {interior.designer || 'Chưa cập nhật'}
                             </Typography>
-                             <Chip label={interior.status} color="success" size="small" className="mt-2" />
+                            <Chip label={interior.status} color="success" size="small" className="mt-2" />
                         </div>
                     </div>
 
                     {/* Form Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <TextField label="Tên thiết kế" name="title" value={interior.title} onChange={handleChange} fullWidth required variant="outlined" InputLabelProps={{ shrink: true }} disabled={loading}/>
-                        <TextField label="Designer" name="designer" value={interior.designer || ''} onChange={handleChange} fullWidth variant="outlined" InputLabelProps={{ shrink: true }} disabled={loading}/>
-                        <TextField label="Loại phòng" name="roomType" value={interior.roomType} onChange={handleChange} fullWidth variant="outlined" InputLabelProps={{ shrink: true }} disabled={loading}/>
-                        <TextField label="Phong cách" name="style" value={interior.style} onChange={handleChange} fullWidth variant="outlined" InputLabelProps={{ shrink: true }} disabled={loading}/>
-                        
-                        <TextField 
-                            label="Mô tả" 
+                        <TextField label="Tên thiết kế" name="title" value={interior.title} onChange={handleChange} fullWidth required variant="outlined" InputLabelProps={{ shrink: true }} disabled={loading} />
+                        <TextField label="Designer" name="designer" value={interior.designer || ''} onChange={handleChange} fullWidth variant="outlined" InputLabelProps={{ shrink: true }} disabled={loading} />
+                        <TextField label="Loại phòng" name="roomType" value={interior.roomType} onChange={handleChange} fullWidth variant="outlined" InputLabelProps={{ shrink: true }} disabled={loading} />
+                        <TextField label="Phong cách" name="style" value={interior.style} onChange={handleChange} fullWidth variant="outlined" InputLabelProps={{ shrink: true }} disabled={loading} />
+
+                        <TextField
+                            label="Mô tả"
                             name="description"
                             value={interior.description}
                             onChange={handleChange}
-                            fullWidth 
+                            fullWidth
                             multiline
                             rows={4}
-                            variant="outlined" 
+                            variant="outlined"
                             InputLabelProps={{ shrink: true }}
                             disabled={loading}
                             className="md:col-span-2"
                         />
-                        
-                        <TextField label="ID" value={interior.designId} fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }}/>
+
+                        <TextField label="ID" value={interior.designId} fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }} />
                     </div>
 
                     {/* Buttons Save/Delete */}
@@ -184,13 +184,13 @@ const InteriorProfile = () => {
                 <Typography variant="h5" component="h2" className="font-bold mb-4">
                     Sản phẩm đi kèm ({interior.products.length})
                 </Typography>
-                
+
                 {interior.products.length > 0 ? (
                     <div className="flex overflow-x-auto gap-4 p-2 bg-gray-100 rounded-lg">
                         {interior.products.map(productItem => (
-                            <Paper 
-                                key={productItem.product.id} 
-                                className="flex-shrink-0 w-40 overflow-hidden rounded-md shadow" 
+                            <Paper
+                                key={productItem.product.id}
+                                className="flex-shrink-0 w-40 overflow-hidden rounded-md shadow"
                                 elevation={2}
                             >
                                 <img src={productItem.product.thumbnailImage} alt={productItem.product.name} className="w-full h-28 object-cover" />

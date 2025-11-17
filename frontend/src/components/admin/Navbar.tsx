@@ -2,7 +2,7 @@
 // (Sửa đổi file 'uploaded:Navbar.tsx' của bạn)
 
 import React, { useState, useEffect } from 'react'; // Sửa 1: Thêm useState, useEffect
-import { Link } from 'react-router'; 
+import { Link } from 'react-router';
 import { useAuth } from '@/context/AuthContext';
 import { Bell } from 'lucide-react'; // Sửa 2: Thêm icon Bell
 import { Badge, IconButton } from '@mui/material'; // Sửa 3: Thêm Badge để hiện số thông báo
@@ -16,23 +16,23 @@ const isPending = (item: any) => item.id % 2 !== 0;
 
 // Kiểu dữ liệu (có role)
 type UserNavItem = {
-  id: number; 
-  img?: string; 
-  role: 'user' | 'designer' | 'admin'; 
+  id: number;
+  img?: string;
+  role: 'user' | 'designer' | 'admin';
 };
 
 // Hàm tạo link profile (Giữ nguyên)
 const getProfileLinkNav = (user: UserNavItem): string => {
-    switch (user.role) {
-        case 'admin': return `/admin/${user.id}`;
-        case 'designer': return `/designer/${user.id}`;
-        default: return `/users/${user.id}`;
-    }
+  switch (user.role) {
+    case 'admin': return `/admin/${user.id}`;
+    case 'designer': return `/designer/${user.id}`;
+    default: return `/users/${user.id}`;
+  }
 };
 
 const Navbar = () => {
   const { user } = useAuth();
-  
+
   // Sửa 4: Thêm state cho thông báo
   const [pendingCount, setPendingCount] = useState(0);
   const [loadingBell, setLoadingBell] = useState(true);
@@ -57,7 +57,7 @@ const Navbar = () => {
         // API thật:
         // const response = await fetch(REAL_API_PENDING_COUNT_URL);
         // const { count } = await response.json();
-        
+
         setPendingCount(count);
 
       } catch (error) {
@@ -74,10 +74,10 @@ const Navbar = () => {
   return (
     <div className='header flex h-[56px] w-full justify-between items-center px-[32px] top-0 fixed z-1000'>
       <div className='text-black text-2xl font-bold font-serif'>PRAXIS</div>
-      
+
       {/* Sửa 6: Thêm chuông và Avatar */}
       <div className='flex items-center gap-4'> {/* Bọc 2 icon lại */}
-        
+
         {/* === CHUÔNG THÔNG BÁO (Chỉ admin thấy) === */}
         {user?.role === 'admin' && !loadingBell && (
           <Link to="/admin_approval" title="Duyệt thiết kế">
@@ -93,15 +93,15 @@ const Navbar = () => {
         {/* Avatar (Giữ nguyên logic của bạn) */}
         <div className='flex'>
           {user ? (
-            <Link to={getProfileLinkNav(user)}> 
-              <img 
+            <Link to={getProfileLinkNav(user)}>
+              <img
                 className='avatarboth w-[40px] h-[40px] rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-blue-500'
                 src={user.img || "https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg"} // Ảnh mặc định
-                alt="avatar" 
+                alt="avatar"
               />
             </Link>
           ) : (
-            <div className='avatar-placeholder w-[40px] h-[40px] rounded-full bg-gray-300 animate-pulse'></div> 
+            <div className='avatar-placeholder w-[40px] h-[40px] rounded-full bg-gray-300 animate-pulse'></div>
           )}
         </div>
       </div>

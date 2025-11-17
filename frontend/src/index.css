@@ -22,7 +22,7 @@ body {
 
 .main {
   font-family: theme('fontFamily.inter');
-  background-image: 
+  background-image:
     linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)),
     url('https://www.epicsurface.com/storage/2023/01/en-2023-interior-design-trends-5-trends-for-the-upcoming-months_63c7dbfae0edf.jpg');
   min-height: 100vh;
@@ -68,6 +68,7 @@ body {
 .nav-link:hover::before {
   width: 100%;
 }
+
 /* End header */
 
 

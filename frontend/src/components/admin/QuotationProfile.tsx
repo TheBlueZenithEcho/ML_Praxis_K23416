@@ -90,9 +90,9 @@ const QuotationProfile = () => {
             try {
                 const response = await fetch(API_GET_URL);
                 if (!response.ok) throw new Error('Không thể tải danh sách báo giá');
-                
+
                 const data: QuotationProfileType[] = await response.json();
-                
+
                 // Tìm bằng 'id'
                 const foundQuotation = data.find(item => item.id === id);
 
@@ -100,7 +100,7 @@ const QuotationProfile = () => {
                     if (foundQuotation.status === 'PENDING_APPROVAL') {
                         setQuotation(foundQuotation);
                     } else {
-                         setError(`Báo giá này không ở trạng thái chờ duyệt (ID: ${id})`);
+                        setError(`Báo giá này không ở trạng thái chờ duyệt (ID: ${id})`);
                     }
                 } else {
                     setError(`Không tìm thấy báo giá với ID: ${id}`);
@@ -126,10 +126,10 @@ const QuotationProfile = () => {
         console.log(`(Giả lập) Đang gửi body: { status: "ADMIN_APPROVED" }`); // Gửi status mới
 
         // Giả lập
-        await new Promise(resolve => setTimeout(resolve, 1500)); 
+        await new Promise(resolve => setTimeout(resolve, 1500));
         setIsApproving(false);
         setApproveSuccess(true);
-        setTimeout(() => navigate('/admin_quotation'), 2000); 
+        setTimeout(() => navigate('/admin_quotation'), 2000);
     };
 
     if (loading) {
@@ -139,23 +139,23 @@ const QuotationProfile = () => {
     // --- SỬA 4: Giao diện (Render) (Cập nhật toàn bộ JSX) ---
     return (
         <div className='QuotationProfile p-4 flex flex-col gap-6'>
-            
+
             {!quotation ? (
-                 <Box textAlign="center" mt={5}>
+                <Box textAlign="center" mt={5}>
                     <Typography variant="h6" color="error">{error || "Không tải được dữ liệu"}</Typography>
-                 </Box>
+                </Box>
             ) : (
                 <>
                     {/* Phần 1: Thông tin cơ bản */}
                     <Paper elevation={3} className="p-6 rounded-lg bg-white">
-                        
+
                         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
                         {approveSuccess && (
                             <Alert severity="success" sx={{ mb: 2 }}>
                                 Đã duyệt thành công! Đang tự động quay lại...
                             </Alert>
                         )}
-                        
+
                         {/* Header (Bỏ Avatar vì API không có) */}
                         <div className="flex flex-col md:flex-row items-center gap-6 mb-6">
                             {/* <Avatar ... /> (Bỏ avatar) */}
@@ -166,15 +166,15 @@ const QuotationProfile = () => {
                                 <Typography variant="subtitle1" color="textSecondary">
                                     Designer: {quotation.designerName} | Khách hàng: {quotation.customerName}
                                 </Typography>
-                                <Chip 
-                                    label={quotation.status} 
-                                    color="warning" 
-                                    size="small" 
-                                    className="mt-2 mr-2" 
+                                <Chip
+                                    label={quotation.status}
+                                    color="warning"
+                                    size="small"
+                                    className="mt-2 mr-2"
                                 />
-                                <Chip 
+                                <Chip
                                     label={`Version: ${quotation.version}`}
-                                    size="small" 
+                                    size="small"
                                     className="mt-2"
                                     variant="outlined"
                                 />
@@ -183,63 +183,63 @@ const QuotationProfile = () => {
 
                         {/* Thông tin chi tiết */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <TextField label="ID Báo giá" value={quotation.id} fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }}/>
-                            <TextField 
-                                label="Ngày gửi duyệt" 
-                                value={quotation.submittedAt ? new Date(quotation.submittedAt).toLocaleString('vi-VN') : 'N/A'} 
-                                fullWidth 
-                                disabled 
-                                variant="outlined" 
+                            <TextField label="ID Báo giá" value={quotation.id} fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }} />
+                            <TextField
+                                label="Ngày gửi duyệt"
+                                value={quotation.submittedAt ? new Date(quotation.submittedAt).toLocaleString('vi-VN') : 'N/A'}
+                                fullWidth
+                                disabled
+                                variant="outlined"
                                 InputLabelProps={{ shrink: true }}
                             />
-                            <TextField label="ID Khách hàng" value={quotation.customerId} fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }}/>
-                            <TextField label="ID Designer" value={quotation.designerId} fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }}/>
+                            <TextField label="ID Khách hàng" value={quotation.customerId} fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }} />
+                            <TextField label="ID Designer" value={quotation.designerId} fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }} />
 
-                            <TextField 
-                                label="Ghi chú cho Admin" 
+                            <TextField
+                                label="Ghi chú cho Admin"
                                 value={quotation.notesToAdmin || '(Không có)'}
-                                fullWidth 
+                                fullWidth
                                 multiline
                                 rows={3}
                                 disabled
-                                variant="outlined" 
+                                variant="outlined"
                                 InputLabelProps={{ shrink: true }}
                                 className="md:col-span-2"
                             />
-                             <TextField 
-                                label="Ghi chú cho Khách hàng" 
+                            <TextField
+                                label="Ghi chú cho Khách hàng"
                                 value={quotation.notesToCustomer || '(Không có)'}
-                                fullWidth 
+                                fullWidth
                                 multiline
                                 rows={3}
                                 disabled
-                                variant="outlined" 
+                                variant="outlined"
                                 InputLabelProps={{ shrink: true }}
                                 className="md:col-span-2"
                             />
 
                             {/* Summary (Tổng tiền) */}
-                            <TextField 
-                                label="Tạm tính (VND)" 
+                            <TextField
+                                label="Tạm tính (VND)"
                                 value={quotation.summary.subtotal.toLocaleString('vi-VN')}
                                 fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }}
                             />
-                            <TextField 
-                                label="Giảm giá (VND)" 
+                            <TextField
+                                label="Giảm giá (VND)"
                                 value={quotation.summary.discount.toLocaleString('vi-VN')}
                                 fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }}
                             />
-                             <TextField 
-                                label="Thuế VAT (%)" 
+                            <TextField
+                                label="Thuế VAT (%)"
                                 value={`${quotation.summary.taxPercent}% (${quotation.summary.taxAmount.toLocaleString('vi-VN')} VND)`}
                                 fullWidth disabled variant="outlined" InputLabelProps={{ shrink: true }}
                             />
-                             <TextField 
-                                label="TỔNG CỘNG (VND)" 
+                            <TextField
+                                label="TỔNG CỘNG (VND)"
                                 value={quotation.summary.totalAmount.toLocaleString('vi-VN')}
-                                fullWidth 
-                                disabled 
-                                variant="outlined" 
+                                fullWidth
+                                disabled
+                                variant="outlined"
                                 InputLabelProps={{ shrink: true }}
                                 sx={{ "& .MuiInputBase-input.Mui-disabled": { color: 'green', WebkitTextFillColor: 'green', fontWeight: 'bold' } }}
                             />
@@ -252,7 +252,7 @@ const QuotationProfile = () => {
                                 variant="contained"
                                 color="primary"
                                 size="large"
-                                disabled={isApproving || approveSuccess} 
+                                disabled={isApproving || approveSuccess}
                                 startIcon={isApproving ? <CircularProgress size={20} color="inherit" /> : <CheckCircle size={20} />}
                             >
                                 {isApproving ? 'Đang duyệt...' : 'Approve'}
@@ -265,11 +265,11 @@ const QuotationProfile = () => {
                         <Typography variant="h5" component="h2" className="font-bold mb-4">
                             Chi tiết hạng mục ({quotation.lineItems.length})
                         </Typography>
-                        
+
                         {quotation.lineItems.length > 0 ? (
                             <TableContainer component={Paper} variant="outlined">
                                 <Table>
-                                    <TableHead sx={{backgroundColor: '#f9f9f9'}}>
+                                    <TableHead sx={{ backgroundColor: '#f9f9f9' }}>
                                         <TableRow>
                                             <TableCell sx={{ fontWeight: 'bold' }}>Tên hạng mục</TableCell>
                                             <TableCell sx={{ fontWeight: 'bold' }}>Mô tả</TableCell>
@@ -297,22 +297,22 @@ const QuotationProfile = () => {
                             </Typography>
                         )}
                     </Paper>
-                    
+
                     {/* === PHẦN 3: LỊCH SỬ DUYỆT (MỚI) === */}
                     <Paper elevation={3} className="p-6 rounded-lg bg-white">
                         <Typography variant="h5" component="h2" className="font-bold mb-4">
                             Lịch sử duyệt
                         </Typography>
-                        
+
                         {quotation.approvalHistory.length > 0 ? (
-                             <Box className="flex flex-col gap-4">
+                            <Box className="flex flex-col gap-4">
                                 {quotation.approvalHistory.map((history, index) => (
                                     <Paper key={index} variant="outlined" className="p-4 bg-gray-50">
                                         <Box className="flex justify-between items-center mb-2">
                                             <Box className="flex items-center gap-2">
                                                 <Avatar sx={{ width: 24, height: 24, fontSize: '0.8rem' }}>{history.adminName.charAt(0)}</Avatar>
                                                 <Typography variant="subtitle1" className="font-semibold">{history.adminName}</Typography>
-                                                <Chip 
+                                                <Chip
                                                     label={history.status}
                                                     color={history.status === 'REJECTED' ? 'error' : 'default'}
                                                     size="small"
@@ -327,7 +327,7 @@ const QuotationProfile = () => {
                                         </Typography>
                                     </Paper>
                                 ))}
-                             </Box>
+                            </Box>
                         ) : (
                             <Typography variant="body1" className="text-gray-500">
                                 Đây là lần duyệt đầu tiên, chưa có lịch sử.

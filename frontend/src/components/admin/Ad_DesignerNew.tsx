@@ -293,7 +293,7 @@ const Ad_DesignerNew = () => {
             disabled={loading}
             startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
           >
-            {loading ? 'Đang tạo...' : 'Tạo Designer'}
+            {loading ? 'Đang tạo...' : 'Add New Designer'}
           </Button>
         </div>
       </form>

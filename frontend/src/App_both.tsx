@@ -199,7 +199,7 @@ const router = createBrowserRouter([
       { path: "livingRoom", element: <LivingRoom /> },
       { path: "bedRoom", element: <BedRoom /> },
       { path: "kitchen", element: <Kitchen /> },
-      { path: "consultation", element: (<ConsultationPage />) },
+      { path: "consultation", element: (<ConsultationPage />)},
       { path: "profile", element: <Cus_Profile /> },
 
     ],

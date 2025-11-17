@@ -6,7 +6,7 @@ import Menu from '../components/admin/Menu';
 const LayoutAdmin = () => {
   return (
     <div className="main main min-h-screen flex flex-col ">
-      <div className="navbar-container"> 
+      <div className="navbar-container">
         <Navbar />
       </div>
       <div className="than flex h-screen pt-[65px] px-1">

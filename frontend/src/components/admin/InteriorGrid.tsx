@@ -3,11 +3,11 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    CircularProgress, 
-    Typography, 
-    Alert, 
-    TextField, 
+import {
+    CircularProgress,
+    Typography,
+    Alert,
+    TextField,
     InputAdornment
 } from '@mui/material';
 import { Search as SearchIcon } from 'lucide-react';
@@ -39,12 +39,12 @@ const InteriorsTable = () => {
             try {
                 const response = await fetch(MOCK_API_GET_URL);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
+
                 const data: InteriorData[] = await response.json();
-                
+
                 // Lọc những thiết kế đã 'APPROVED'
                 const approvedData = data.filter(item => item.status === 'APPROVED');
-                
+
                 setInteriors(approvedData);
 
             } catch (e: any) {
@@ -58,8 +58,8 @@ const InteriorsTable = () => {
 
     // SỬA: Đã đúng. Dùng designId (string) và điều hướng
     const handleViewDetails = (designId: string) => {
-         // Điều hướng đến path bạn muốn: /admin_interior/design_002
-         navigate(`/admin_interior/${designId}`); 
+        // Điều hướng đến path bạn muốn: /admin_interior/design_002
+        navigate(`/admin_interior/${designId}`);
     };
 
     // Logic tìm kiếm
@@ -84,7 +84,7 @@ const InteriorsTable = () => {
             <div className="searchbar flex justify-end items-center px-4 pt-0 pb-4">
                 <TextField
                     variant="standard"
-                    placeholder="Tìm thiết kế..."
+                    placeholder="Search"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                     InputProps={{
@@ -94,18 +94,18 @@ const InteriorsTable = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                
+
                 {filteredInteriors.length === 0 && (
                     <Typography className="col-span-full text-center text-gray-500 py-8">
                         Không tìm thấy thiết kế nào.
                     </Typography>
                 )}
-                
+
                 {filteredInteriors.map((item) => (
                     <div
                         key={item.designId}
                         className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 group relative"
-                        onClick={() => handleViewDetails(item.designId)} 
+                        onClick={() => handleViewDetails(item.designId)}
                     >
                         <img
                             src={item.images[0]} // Lấy ảnh đầu tiên
@@ -113,7 +113,7 @@ const InteriorsTable = () => {
                             className="w-full h-full object-cover"
                         />
                         <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/80 to-transparent">
-                             <p className="text-white text-sm font-semibold truncate">{item.title}</p>
+                            <p className="text-white text-sm font-semibold truncate">{item.title}</p>
                         </div>
                     </div>
                 ))}
