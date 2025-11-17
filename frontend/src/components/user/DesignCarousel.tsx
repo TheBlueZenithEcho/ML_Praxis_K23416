@@ -21,16 +21,16 @@ const DesignCarousel: React.FC<DesignCarouselProps> = ({ designs, loading, error
     const [showModal, setShowModal] = useState(false);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    const { user } = useAuth(); // ✅ Lấy user từ context
+    const { profile } = useAuth();
 
     // 👉 Khi nhấn nút "add"
     const handleAddClick = (design: Design) => {
-        if (!user) {
+        if (!profile) {
             setShowModal(true);
             return;
         }
 
-        const key = `designTab_${user.id}`;
+        const key = `designTab_${profile.id}`;
         const saved: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
 
         // Tránh duplicate
@@ -38,7 +38,7 @@ const DesignCarousel: React.FC<DesignCarouselProps> = ({ designs, loading, error
         if (!exists) {
             const updated = [...saved, design];
             localStorage.setItem(key, JSON.stringify(updated));
-            console.log(`Design "${design.name}" đã được thêm vào Design Tab của ${user.name}`);
+            console.log(`Design "${design.name}" đã được thêm vào Design Tab của ${profile.name}`);
 
             // --- THÊM DÒNG NÀY ---
             window.dispatchEvent(new Event("designTabChange")); // báo các component khác update
@@ -110,10 +110,10 @@ const DesignCarousel: React.FC<DesignCarouselProps> = ({ designs, loading, error
                                     </button>
                                 </div>
 
-                                <div className="p-4 h-1/4 flex flex-col justify-center">
-                                    <h3 className="font-semibold text-lg truncate">{design.name}</h3>
-                                    <p className="text-gray-600 text-sm">Designer: {design.designer}</p>
-                                    <p className="text-gray-600 text-sm">Room: {design["type room"]}</p>
+                                <div className="pl-4 pr-4 h-1/4 flex flex-col justify-center pb-1">
+                                    <h3 className="font-semibold text-[32] truncate font-lora">{design.name}</h3>
+                                    <p className="text-gray-600 text-sm font-lora">Designer: {design.designer}</p>
+                                    <p className="text-gray-600 text-xs font-lora">Room: {design["type room"]}</p>
                                 </div>
                             </div>
                         </div>

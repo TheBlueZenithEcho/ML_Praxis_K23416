@@ -11,14 +11,14 @@ const Hero = () => {
                             <h1 className='h1 mb-4 text-3xl md:text-5xl lg:text-5xl drop-shadow-lg font-bold mt-7 lg:mr-10 font-serif text-[#FFD600]'>Elevate Your Space</h1>
                             <h1 className='h1 mb-0 text-3xl md:text-5xl lg:text-5xl drop-shadow-lg font-bold lg:mr-10 font-serif text-[#FFD600]'>Elevate Your Life</h1>
                             <p className='inter drop-shadow-lg text-[#FDFBCE] italic  mt-2 text-sm xl:text-base whitespace-nowrap text-center lg:self-end lg:mr-[45px]'> Where extraordinary design meets unparalleled comfort</p>
-                            
+
                         </div>
                     </div>
 
                 </section>
             </div>
 
-            
+
         </>
     )
 }

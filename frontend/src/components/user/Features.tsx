@@ -19,7 +19,7 @@ const Features = () => {
                             </div>
                         </div>
 
-                        
+
                     </div>
 
                     <div className='mx-auto xl:px-0 bg-[#FDFBCE] bg-opacity-40 xl:rounded-tr-[290px] pt-48 xl:pt-40 pb-20'>
@@ -70,7 +70,7 @@ const Features = () => {
                                                 <i className="bi bi-box-seam text-4xl text-green-700 mb-3"></i>
                                                 <h4 className="font-semibold text-green-800">Deliver</h4>
                                             </div>
-                                    </div>
+                                        </div>
                                         {/* {/* Tách 3 mục ra 3 div riêng để dễ quản lý khoảng cách hơn
                                         <h3 className='bi bi-stars text-[#F8B518] text-1xl md:text-2xl lg:text-2xl font-lora font-semibold'>Centralized Hub</h3>
                                         <p className='font-inter text-[16px] mb-5'>All communication, product lists, and documents stored in one place. No more lost information across various apps.</p>

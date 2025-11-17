@@ -1,6 +1,5 @@
-import React, { FC } from 'react';
+import React, { FC } from "react";
 
-// Giả sử logic gửi form được xử lý ở đây hoặc truyền qua props
 const ContactForm: FC = () => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -8,29 +7,96 @@ const ContactForm: FC = () => {
     };
 
     return (
-        <div className="lg:w-1/2 p-8 bg-gray-800 rounded-lg shadow-xl">
-            <h3 className="text-lg text-gray-400 font-light mb-1">Contact Us</h3>
-            <h2 className="text-4xl font-semibold mb-8">Get In Touch</h2>
+        <section className="flex items-center justify-center py-20 mt-25">
+            <div className="bg-[#FDFBCE] bg-opacity-40 rounded-3xl p-10 w-[420px] shadow-[10px_10px_20px_#c9ccd1,-10px_-10px_20px_#ffffff]">
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <input type="text" placeholder="Name..." required
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-md focus:ring-1 focus:ring-white focus:border-white placeholder-gray-400" />
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-xl font-semibold text-gray-700">Get In Touch</h1>
+                    <p className="text-gray-500 text-sm mt-1">Send us a message</p>
+                </div>
 
-                <input type="email" placeholder="example@email.com" required
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-md focus:ring-1 focus:ring-white focus:border-white placeholder-gray-400" />
+                <form onSubmit={handleSubmit} className="space-y-6">
 
-                <input type="text" placeholder="Title..."
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-md focus:ring-1 focus:ring-white focus:border-white placeholder-gray-400" />
+                    {/* Input Wrapper */}
+                    <div className="bg-[#FDFBCE] rounded-xl flex items-center gap-3 px-4 h-12 bg-opacity-40 shadow-[inset_8px_8px_16px_#c7cacc,inset_-8px_-8px_16px_#ffffff]">
+                        <i className="bi bi-person text-gray-500"></i>
+                        <input
+                            type="text"
+                            placeholder="Your Name"
+                            className="flex-1 bg-transparent outline-none text-gray-700"
+                            required
+                        />
+                    </div>
 
-                <textarea placeholder="Type Here..." rows={6}
-                    className="w-full p-4 bg-gray-700 border border-gray-600 rounded-md focus:ring-1 focus:ring-white focus:border-white resize-none placeholder-gray-400" />
+                    {/* Email */}
+                    <div className="bg-[#FDFBCE] bg-opacity-40 rounded-xl flex items-center gap-3 px-4 h-12 shadow-[inset_8px_8px_16px_#c7cacc,inset_-8px_-8px_16px_#ffffff]
+                    ">
+                        <i className="bi bi-envelope text-gray-500"></i>
+                        <input
+                            type="email"
+                            placeholder="Email Address"
+                            className="flex-1 bg-transparent outline-none text-gray-700"
+                            required
+                        />
+                    </div>
 
-                <button type="submit"
-                    className="px-8 py-3 bg-gray-800 border border-gray-500 rounded-md hover:bg-gray-700 transition-colors font-medium">
-                    Send Now
-                </button>
-            </form>
-        </div>
+                    {/* Subject */}
+                    <div className="
+                        bg-[#FDFBCE] bg-opacity-40
+                        rounded-xl 
+                        flex 
+                        items-center 
+                        gap-3 
+                        px-4 
+                        h-12 
+                        shadow-[inset_8px_8px_16px_#c7cacc,inset_-8px_-8px_16px_#ffffff]
+                    ">
+                        <i className="bi bi-chat-left-text text-gray-500"></i>
+                        <input
+                            type="text"
+                            placeholder="Subject"
+                            className="flex-1 bg-transparent outline-none text-gray-700"
+                        />
+                    </div>
+
+                    {/* Message */}
+                    <div className="
+                        bg-[#FDFBCE] bg-opacity-40
+                        rounded-2xl 
+                        px-4 
+                        py-3 
+                        shadow-[inset_8px_8px_16px_#c7cacc,inset_-8px_-8px_16px_#ffffff]
+                    ">
+                        <textarea
+                            placeholder="Your Message..."
+                            rows={4}
+                            className="w-full bg-transparent outline-none text-gray-700 resize-none"
+                            required
+                        ></textarea>
+                    </div>
+
+                    {/* Button */}
+                    <button
+                        type="submit"
+                        className="
+                            w-full 
+                            py-3 
+                            rounded-xl 
+                            text-white 
+                            font-semibold 
+                            bg-[#082503]
+                            shadow-[6px_6px_12px_#c1c4c9,-6px_-6px_12px_#ffffff]
+                            hover:brightness-105
+                            transition
+                        "
+                    >
+                        Send Message
+                    </button>
+                </form>
+
+            </div>
+        </section>
     );
 };
 

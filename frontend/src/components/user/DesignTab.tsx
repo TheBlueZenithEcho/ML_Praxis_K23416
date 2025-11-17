@@ -22,17 +22,17 @@ interface DesignTabProps {
 
 
 const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
-    const { user } = useAuth();
+    const { profile } = useAuth();
     const [items, setItems] = useState<Design[]>([]);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const navigate = useNavigate();
 
     const loadItems = () => {
-        if (!user) {
+        if (!profile) {
             setItems([]);
             return;
         }
-        const key = `designTab_${user.id}`;
+        const key = `designTab_${profile.id}`;
         const saved: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
         setItems(saved);
     };
@@ -42,11 +42,11 @@ const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
         loadItems();
         window.addEventListener("designTabChange", loadItems);
         return () => window.removeEventListener("designTabChange", loadItems);
-    }, [user]);
+    }, [profile]);
 
     const handleRemove = (id: number) => {
-        if (!user) return;
-        const key = `designTab_${user.id}`;
+        if (!profile) return;
+        const key = `designTab_${profile.id}`;
         const saved: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
         const updated = saved.filter((d) => d.id !== id);
         localStorage.setItem(key, JSON.stringify(updated));
@@ -55,11 +55,11 @@ const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
     };
 
     const handleClearAll = () => {
-        if (!user) {
+        if (!profile) {
             setShowLoginModal(true);
             return;
         }
-        const key = `designTab_${user.id}`;
+        const key = `designTab_${profile.id}`;
         localStorage.removeItem(key);
         setItems([]);
         // Dispatch event để header cập nhật badge ngay
@@ -69,13 +69,13 @@ const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
 
     //
     const handleSendDesignsToChat = () => {
-        if (!user) return;
-        const key = `designTab_${user.id}`;
+        if (!profile) return;
+        const key = `designTab_${profile.id}`;
         const savedDesigns = JSON.parse(localStorage.getItem(key) || '[]') as Design[];
         if (savedDesigns.length === 0) return;
 
         // Lưu designs tạm cho ConsultationPage
-        localStorage.setItem(`pendingDesigns_${user.id}`, JSON.stringify(savedDesigns));
+        localStorage.setItem(`pendingDesigns_${profile.id}`, JSON.stringify(savedDesigns));
 
         // ✅ Dispatch event **trước khi xóa**
         window.dispatchEvent(new Event("sendDesignsToChat"));
@@ -91,12 +91,12 @@ const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
         onClose();
 
         // Chuyển trang
-        navigate(`/customer/${user.id}/consultation`);
+        navigate(`/customer/${profile.id}/consultation`);
     };
 
     useEffect(() => {
-        if (open && !user) setShowLoginModal(true);
-    }, [open, user]);
+        if (open && !profile) setShowLoginModal(true);
+    }, [open, profile]);
 
     return (
         <>
@@ -131,14 +131,14 @@ const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
                     </button>
                     <button
                         onClick={() => {
-                            if (!user) return;
+                            if (!profile) return;
 
-                            const key = `designTab_${user.id}`;
+                            const key = `designTab_${profile.id}`;
                             const savedDesigns: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
                             if (savedDesigns.length === 0) return;
 
                             // Lưu tạm designs
-                            localStorage.setItem(`pendingDesigns_${user.id}`, JSON.stringify(savedDesigns));
+                            localStorage.setItem(`pendingDesigns_${profile.id}`, JSON.stringify(savedDesigns));
 
                             // ✅ Thông báo header trước khi xóa localStorage
                             window.dispatchEvent(new Event("sendDesignsToChat"));
@@ -148,7 +148,7 @@ const DesignTab: React.FC<DesignTabProps> = ({ open, onClose }) => {
                             onClose();
 
                             // Chuyển sang ConsultationPage
-                            navigate(`/customer/${user.id}/consultation`);
+                            navigate(`/customer/${profile.id}/consultation`);
                         }}
                         className="bg-green-600 text-white py-2 rounded"
                     >

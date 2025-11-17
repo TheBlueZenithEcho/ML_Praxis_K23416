@@ -17,13 +17,13 @@ interface DesignGridProps {
     category: string;
 }
 
-const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
-    const { user } = useAuth(); //  Lấy user từ context
+const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {//  Lấy user từ context
     const [designs, setDesigns] = useState<Design[]>([]);
     const [visibleDesigns, setVisibleDesigns] = useState<Design[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
+    const { profile } = useAuth();
 
     useEffect(() => {
         const fetchDesigns = async () => {
@@ -56,12 +56,12 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
     }, [category]);
 
     const handleAddClick = (design: Design) => {
-        if (!user) {
+        if (!profile) {
             setShowModal(true);
             return;
         }
 
-        const key = `designTab_${user.id}`;
+        const key = `designTab_${profile.id}`;
         const saved: Design[] = JSON.parse(localStorage.getItem(key) || "[]");
 
         // Tránh duplicate
@@ -69,7 +69,7 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
         if (!exists) {
             const updated = [...saved, design];
             localStorage.setItem(key, JSON.stringify(updated));
-            console.log(`Design "${design.name}" đã được thêm vào Design Tab của ${user.name}`);
+            console.log(`Design "${design.name}" đã được thêm vào Design Tab của ${profile.name}`);
 
             // --- THÊM DÒNG NÀY ---
             window.dispatchEvent(new Event("designTabChange")); // báo các component khác update
@@ -81,7 +81,7 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
     if (loading)
         return (
             <div className="h-[420px] flex items-center justify-center">
-                <p>Đang tải thiết kế...</p>
+                <p>Loading design….</p>
             </div>
         );
 
@@ -95,7 +95,7 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
     if (visibleDesigns.length === 0)
         return (
             <div className="h-[420px] flex items-center justify-center">
-                <p>Không tìm thấy thiết kế nào cho {category}.</p>
+                <p>No designs found for {category}.</p>
             </div>
         );
 
@@ -130,13 +130,13 @@ const DesignGrid: React.FC<DesignGridProps> = ({ category }) => {
                                     </button>
                                 </div>
                                 <div className="p-3">
-                                    <h3 className="font-semibold text-base truncate text-gray-900">
+                                    <h3 className="font-semibold text-base truncate text-gray-900 text-[32px] font-lora">
                                         {design.name}
                                     </h3>
-                                    <p className="text-gray-600 text-sm mt-1">
+                                    <p className="text-gray-600 text-sm mt-1 font-lora">
                                         Designer: {design.designer}
                                     </p>
-                                    <p className="text-gray-600 text-xs">
+                                    <p className="text-gray-600 text-xs mt-1 font-lora">
                                         Room: {design["type room"]}
                                     </p>
                                 </div>

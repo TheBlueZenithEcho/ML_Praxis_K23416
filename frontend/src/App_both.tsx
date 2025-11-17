@@ -65,6 +65,7 @@ import DesignerLayout from './layouts/LayoutDesigner';
 
 // ⭐️⭐️⭐️ SỬA LỖI 404: THÊM DÒNG IMPORT NÀY ⭐️⭐️⭐️
 import Ad_DesignerNew from './components/admin/Ad_DesignerNew';
+import Cus_Profile from './pages/user/Cus_Profile';
 // ⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️
 
 /*
@@ -198,7 +199,8 @@ const router = createBrowserRouter([
       { path: "livingRoom", element: <LivingRoom /> },
       { path: "bedRoom", element: <BedRoom /> },
       { path: "kitchen", element: <Kitchen /> },
-      { path: "consultation", element: (<ConsultationPage />), }
+      { path: "consultation", element: (<ConsultationPage />) },
+      { path: "profile", element: <Cus_Profile /> },
 
     ],
   },
