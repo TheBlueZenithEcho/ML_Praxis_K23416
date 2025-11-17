@@ -1,21 +1,21 @@
-Đây là hướng dẫn để chạy API Server (Flask) local, sử dụng mô hình .ckpt của bạn để tạo vector và tìm kiếm trên CSDL Supabase.
+Đây là hướng dẫn để chạy API Server (Flask) local, sử dụng mô hình .ckpt để tạo vector và tìm kiếm trên CSDL Supabase.
 
 Bước 1: Cấu trúc Thư mục
 
 Hãy đảm bảo bạn có cấu trúc thư mục như sau:
-
-/your-api-project/
-|-- app.py                   (File 2 - Server API đã sửa)
-|-- lightning_clip.py        (File 3 - Định nghĩa Class Model)
-|-- load_model.py            (File 4 - Hàm tải Model)
-|-- requirements.txt         (File 5 - Đã thêm thư viện Supabase)
-|-- .env                     (File 6 - MỚI, cho Python/Flask)
-|-- model.ckpt               (File .ckpt của bạn)
-
+| Tên Tệp/Đường dẫn | Vai trò chính |
+| :--- | :--- |
+| **`/your-api-project/`** | **Thư mục gốc** của ứng dụng Flask API. |
+| ├── **`app.py`** | **(Server API)** File chính chạy server Flask, xử lý các yêu cầu tìm kiếm (`/api/search`), tạo embeddings và gọi hàm RPC Supabase. |
+| ├── **`lightning_clip.py`** | **(Model Definition)** Định nghĩa lớp **`LightningCLIP`** cần thiết để tải checkpoint và thực hiện forward pass. |
+| ├── **`load_model.py`** | **(Model Loader)** Chứa hàm helper để tải mô hình đã huấn luyện từ file `.ckpt`. |
+| ├── **`requirements.txt`** | **(Dependencies)** Danh sách các thư viện Python cần thiết cho môi trường (`flask`, `supabase`, `torch`, v.v.). |
+| ├── **`.env`** | **(Cấu hình)** Chứa các biến môi trường nhạy cảm như `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`. **Nên loại trừ khỏi Git.** |
+| └── **`model.ckpt`** | **(Model Weights)** File checkpoint chứa trọng số cuối cùng của mô hình đã được fine-tune. |
 
 Bước 2: Điền thông tin Bí mật (File .env MỚI)
 
-Tạo file .env (File 6) và điền thông tin Supabase của bạn vào.
+Tạo file .env và điền thông tin Supabase vào.
 
 Bước 3: Cài đặt Thư viện
 
@@ -31,7 +31,7 @@ pip install -r requirements.txt
 
 Bước 4: Sửa đường dẫn Model (Nếu cần)
 
-Mở file app.py và sửa dòng sau để trỏ đến đúng file .ckpt của bạn:
+Mở file app.py và sửa dòng sau để trỏ đến đúng file .ckpt
 
 # Sửa dòng này trong app.py
 MODEL_CHECKPOINT = "./model.ckpt" # <-- SỬA ĐƯỜNG DẪN NÀY
@@ -45,7 +45,7 @@ Sau khi đã cài đặt, chỉ cần chạy file app.py:
 python3 app.py
 
 
-Server của bạn sẽ khởi động tại http://localhost:5000.
+Server sẽ khởi động tại http://localhost:5000.
 
 Bước 6: Kiểm tra API
 
