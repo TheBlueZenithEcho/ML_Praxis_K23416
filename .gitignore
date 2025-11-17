@@ -24,3 +24,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+model.ckpt
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+build//
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/

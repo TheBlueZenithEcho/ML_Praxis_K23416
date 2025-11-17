@@ -59,3 +59,27 @@ Kiểm tra Search (Tìm kiếm bằng Text):
 curl -X POST http://localhost:5000/api/search \
      -H "Content-Type: application/json" \
      -d '{"text": "sofa"}'
+
+Kiểm tra Search (Tìm kiếm bằng image):
+```bash
+IMAGE_PATH="00293772.jpg"
+IMAGE_BASE64=$(base64 "$IMAGE_PATH" | tr -d '\n')
+# Gửi yêu cầu POST kết hợp Image Base64 và Text
+curl -X POST http://localhost:5000/api/search \
+     -H "Content-Type: application/json" \
+     -d "{
+           \"text\": \"Modern velvet armchair\",
+           \"image\": \"$IMAGE_BASE64\",
+           \"match_count\": 5
+         }"
+```
+Gửi yêu cầu POST kết hợp Image Base64 và Text
+```bash
+curl -X POST http://localhost:5000/api/search \
+     -H "Content-Type: application/json" \
+     -d "{
+           \"text\": \"Modern velvet armchair\",
+           \"image\": \"$IMAGE_BASE64\",
+           \"match_count\": 5
+         }"
+```

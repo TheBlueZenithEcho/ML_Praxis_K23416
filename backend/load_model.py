@@ -8,7 +8,7 @@ def load_trained_model(
     # Thêm các tham số này để khởi tạo class
     txt_model_id="sentence-transformers/all-MiniLM-L6-v2",
     img_model_id="dinov2_vits14",
-    embed_size=64
+    embed_size=384
 ):
     """Load model từ checkpoint"""
     

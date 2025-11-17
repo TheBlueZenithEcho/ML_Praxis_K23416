@@ -39,7 +39,7 @@ print(f"Using device: {device}")
 MODEL_CHECKPOINT = "./model.ckpt" # <-- SỬA ĐƯỜNG DẪN NÀY NẾU CẦN
 TXT_MODEL_ID = "sentence-transformers/all-MiniLM-L6-v2"
 IMG_MODEL_ID = "dinov2_vits14"
-EMBED_DIM = 64 # (Phải khớp 64-dim hay 384-dim bạn dùng)
+EMBED_DIM = 384
 
 print("Loading trained model...")
 model = load_trained_model(
@@ -87,6 +87,7 @@ def search_products():
                 text_emb = model.encode_text(text_inputs)
                 query_embeddings.append(text_emb.cpu().numpy())
 
+
         # 2. Encode image query (Giữ nguyên)
         if image_base64:
             print("Đang tạo image embedding...")
@@ -123,16 +124,22 @@ def search_products():
             'p_match_threshold': match_threshold,
             'p_match_count': match_count
         }
-        
+        try:
+            response = supabase.rpc('search_products_by_image', rpc_params).execute()
+            
+            # Sau khi .execute(), nếu không có lỗi nào được ném ra, ta giả định thành công
+            # Tuy nhiên, nếu hàm RPC trả về một mảng rỗng [] khi thất bại (do logic SQL), 
+            # chúng ta vẫn cần kiểm tra .data
+            if response.data is None:
+                # Nếu không có data, có thể là lỗi cấu hình RPC
+                raise Exception("RPC returned no data. Check SQL function name and parameters.")
+                
+        except Exception as e:
+            # Bắt bất kỳ lỗi nào được ném ra (PostgrestAPIError, v.v.)
+            raise Exception(f"Lỗi RPC Supabase: {str(e)}")
         # Gọi hàm RPC bạn đã tạo (ví dụ: 'search_products_by_image')
         # (Lưu ý: Tên hàm RPC phải khớp với file ..._create_demo_vector_search.sql
         # hoặc ..._update_rpc_search_by_image.sql)
-        response = supabase.rpc('search_products_by_image', rpc_params).execute()
-
-        if response.error:
-            raise Exception(f"Lỗi RPC Supabase: {response.error.message}")
-
-        # 6. Trả về kết quả (đã được CSDL lọc và sắp xếp)
         return jsonify({
             'success': True,
             'products': response.data, # Dữ liệu JSON trả về từ hàm RPC
