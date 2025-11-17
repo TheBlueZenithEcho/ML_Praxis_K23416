@@ -72,7 +72,6 @@ IMAGE_BASE64=$(base64 "$IMAGE_PATH" | tr -d '\n')
 curl -X POST http://localhost:5000/api/search \
      -H "Content-Type: application/json" \
      -d "{
-           \"text\": \"Modern velvet armchair\",
            \"image\": \"$IMAGE_BASE64\",
            \"match_count\": 5
          }"
