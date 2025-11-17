@@ -20,7 +20,7 @@ from lightning_clip import LightningCLIP # Bắt buộc phải import
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # --- (MỚI) Khởi tạo Supabase Client ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
